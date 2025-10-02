@@ -1,187 +1,71 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 // Detecta se estamos em desenvolvimento web
 const isWeb = typeof window !== 'undefined';
 const isDev = process.env.NODE_ENV === 'development';
 
-// Em desenvolvimento web, usar HTTP ao invés de HTTPS
-const API_BASE_URL = isWeb && isDev 
-  ? 'http://localhost:7054/api' 
-  : 'https://localhost:7054/api';
+// Permite sobrescrever via variável de ambiente (Expo): EXPO_PUBLIC_API_BASE_URL
+const ENV_API_BASE = (process.env as any)?.EXPO_PUBLIC_API_BASE_URL as string | undefined;
+
+// Padrão seguro: Web usa HTTPS por padrão (para casar com Swagger em https). Native mantém HTTPS também.
+// Se precisar HTTP (em emuladores), configure EXPO_PUBLIC_API_BASE_URL.
+const DEFAULT_BASE = 'https://localhost:7054/api';
+const API_BASE_URL = (ENV_API_BASE && ENV_API_BASE.trim().length > 0)
+  ? ENV_API_BASE.replace(/\/$/, '')
+  : DEFAULT_BASE;
 
 export interface ApiError {
   message: string;
   status?: number;
 }
 
-// Flag para simular modo offline em desenvolvimento
-const OFFLINE_MODE = true; 
-export const IS_OFFLINE_MODE = OFFLINE_MODE;
-
 class ApiService {
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    // Se estiver em modo offline, simular respostas
-    if (OFFLINE_MODE) {
-      return this.simulateApiResponse<T>(endpoint, options);
-    }
-
     try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...options.headers,
-        },
+      const token = await AsyncStorage.getItem('token');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        ...(options.headers as Record<string, string> | undefined),
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const url = `${API_BASE_URL}${endpoint}`;
+      const response = await fetch(url, {
         ...options,
+        headers,
       });
 
       if (!response.ok) {
-        throw new ApiError(`HTTP error! status: ${response.status}`, response.status);
+        let message = `HTTP error! status: ${response.status}`;
+        try {
+          const err = await response.json();
+          if (err && (err.message || err.title)) {
+            message = err.message || err.title;
+          }
+        } catch {}
+        throw new ApiError(message, response.status);
       }
 
-      const data = await response.json();
-      return data;
+      // Algumas respostas podem não ter corpo
+      const text = await response.text();
+      try {
+        return (text ? JSON.parse(text) : ({} as any)) as T;
+      } catch {
+        // Se não for JSON, retornar texto como any
+        return (text as any) as T;
+      }
     } catch (error) {
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      // Em caso de erro de rede, tentar modo simulado
-      console.warn('API não disponível, usando modo simulado:', error);
-      return this.simulateApiResponse<T>(endpoint, options);
+      if (error instanceof ApiError) throw error;
+      // Repassar erros de rede; ajuste EXPO_PUBLIC_API_BASE_URL se necessário (ex.: https/http)
+      throw error as Error;
     }
   }
 
-  private async simulateApiResponse<T>(endpoint: string, options: RequestInit): Promise<T> {
-    // Simular delay de rede
-    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-
-    const method = options.method || 'GET';
-    const body = options.body ? JSON.parse(options.body as string) : null;
-
-    // Simular respostas baseadas no endpoint
-    if (endpoint.includes('/health')) {
-      return ({ status: 'ok' } as any) as T;
-    }
-    if (endpoint.includes('/auth/login')) {
-      // Verificar credenciais de teste
-      if (body.email === 'teste@moop.com' && body.password === '123456') {
-        return {
-          token: 'mock-jwt-token-' + Date.now(),
-          user: {
-            id: 1,
-            email: body.email,
-            name: 'Usuário Teste'
-          }
-        } as T;
-      } else {
-        throw new ApiError('Email ou senha incorretos');
-      }
-    }
-
-    if (endpoint.includes('/auth/register')) {
-      return {
-        token: 'mock-jwt-token-' + Date.now(),
-        user: {
-          id: 1,
-          email: body.email,
-          name: body.name
-        }
-      } as T;
-    }
-
-    if (endpoint.includes('/oficinas')) {
-      if (method === 'GET' && !endpoint.match(/\/\d+$/)) {
-        // GET /oficinas - listar todas
-        return [
-          { 
-            id: 1, 
-            nome: 'Oficina Central Motors', 
-            endereco: 'Rua das Palmeiras, 123 - Centro', 
-            telefone: '(11) 3333-4444',
-            especialidades: ['Motor', 'Transmissão', 'Freios']
-          },
-          { 
-            id: 2, 
-            nome: 'AutoPeças & Serviços', 
-            endereco: 'Av. Paulista, 567 - Bela Vista', 
-            telefone: '(11) 5555-6666',
-            especialidades: ['Elétrica', 'Ar Condicionado', 'Suspensão']
-          },
-          { 
-            id: 3, 
-            nome: 'Moto Repair Pro', 
-            endereco: 'Rua da Consolação, 890 - Vila Madalena', 
-            telefone: '(11) 7777-8888',
-            especialidades: ['Motor', 'Elétrica', 'Carroceria']
-          }
-        ] as T;
-      }
-      if (method === 'POST') {
-        // POST /oficinas - criar nova
-        return { id: Date.now(), ...body } as T;
-      }
-      if (method === 'PUT') {
-        // PUT /oficinas/{id} - atualizar
-        return { id: parseInt(endpoint.split('/').pop() || '1'), ...body } as T;
-      }
-      if (method === 'DELETE') {
-        // DELETE /oficinas/{id} - deletar
-        return {} as T;
-      }
-    }
-
-    if (endpoint.includes('/mecanicos')) {
-      if (method === 'GET' && !endpoint.match(/\/\d+$/)) {
-        // GET /mecanicos - listar todos
-        return [
-          { id: 1, nome: 'João Silva', especialidade: 'Motor' },
-          { id: 2, nome: 'Maria Santos', especialidade: 'Elétrica' },
-          { id: 3, nome: 'Pedro Costa', especialidade: 'Suspensão' }
-        ] as T;
-      }
-      if (method === 'POST') {
-        // POST /mecanicos - criar novo
-        return { id: Date.now(), ...body } as T;
-      }
-      if (method === 'PUT') {
-        // PUT /mecanicos/{id} - atualizar
-        return { id: parseInt(endpoint.split('/').pop() || '1'), ...body } as T;
-      }
-      if (method === 'DELETE') {
-        // DELETE /mecanicos/{id} - deletar
-        return {} as T;
-      }
-    }
-
-    if (endpoint.includes('/depositos') || endpoint.includes('/Deposito')) {
-      if (method === 'GET' && !endpoint.match(/\/\d+$/)) {
-        // GET /depositos - listar todos
-        return [
-          { id: 1, nome: 'Depósito Matriz', endereco: 'Rua Alfa, 100 - Centro' },
-          { id: 2, nome: 'Depósito Secundário', endereco: 'Av. Beta, 200 - Industrial' },
-          { id: 3, nome: 'Depósito Leste', endereco: 'Rua Gama, 300 - Jardim' },
-        ] as T;
-      }
-      if (method === 'GET' && endpoint.match(/\/\d+$/)) {
-        const id = parseInt(endpoint.split('/').pop() || '1');
-        return ({ id, nome: `Depósito ${id}`, endereco: `Endereço ${id}` } as any) as T;
-      }
-      if (method === 'POST') {
-        // POST /depositos - criar novo
-        return { id: Date.now(), ...body } as T;
-      }
-      if (method === 'PUT') {
-        // PUT /depositos/{id} - atualizar
-        return { id: parseInt(endpoint.split('/').pop() || '1'), ...body } as T;
-      }
-      if (method === 'DELETE') {
-        // DELETE /depositos/{id} - deletar
-        return {} as T;
-      }
-    }
-
-    throw new ApiError('Endpoint não encontrado no modo simulado');
-  }
 
   async get<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: 'GET' });

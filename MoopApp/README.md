@@ -2,13 +2,13 @@
 
 ## Integrantes
 
-- Davi Gonzaga Ferreira RM554890
-- Leonardo Cadena de Souza RM557528
-- Julia Vasconcelos Oliveira RM558785
+- Davi Gonzaga Ferreira — RM554890 — GitHub: [preencher]
+- Leonardo Cadena de Souza — RM557528 — GitHub: [preencher]
+- Julia Vasconcelos Oliveira — RM558785 — GitHub: [preencher]
 
 ## Descrição
 
-O Moop é um aplicativo avançado desenvolvido em React Native com Expo que permite a gestão de oficinas, mecânicos, depósitos e motos locais. O aplicativo inclui sistema de autenticação, temas claro/escuro e funcionalidades CRUD completas através de uma API .NET.
+O Moop é um aplicativo desenvolvido em React Native com Expo que permite a gestão de oficinas, mecânicos, depósitos e motos. O aplicativo inclui sistema de autenticação (login/cadastro/logout), temas claro/escuro e funcionalidades CRUD completas integradas a uma API .NET.
 
 ## Funcionalidades Principais
 
@@ -18,21 +18,21 @@ O Moop é um aplicativo avançado desenvolvido em React Native com Expo que perm
 - **Logout funcional** com confirmação
 - Armazenamento seguro de tokens de autenticação
 
-### Gerenciamento de Oficinas (API Integration)
+### Gerenciamento de Oficinas (API)
 - **Create**: Cadastro de novas oficinas (nome, endereço, telefone, especialidades)
 - **Read**: Lista de oficinas com busca e refresh
 - **Update**: Edição de oficinas existentes
 - **Delete**: Remoção com confirmação
 - **Detalhes**: Visualização completa com ações (ligar, ver no mapa)
 
-### Gerenciamento de Mecânicos (API Integration)
+### Gerenciamento de Mecânicos (API)
 - **Create**: Cadastro de mecânicos (nome, especialidade)
 - **Read**: Lista de mecânicos com busca e refresh
 - **Update**: Edição de mecânicos existentes
 - **Delete**: Remoção com confirmação
 - **Detalhes**: Visualização completa do mecânico
 
-### Gerenciamento de Depósitos (API Integration)
+### Gerenciamento de Depósitos (API)
 - **Create**: Cadastro de novos depósitos (nome, endereço)
 - **Read**: Lista de depósitos com refresh
 - **Update**: Edição de depósitos existentes
@@ -45,11 +45,11 @@ O Moop é um aplicativo avançado desenvolvido em React Native com Expo que perm
 - **Toggle automático** com persistência de preferências
 - Cores, tipografia e espaçamentos consistentes
 
-### Funcionalidades Existentes (Mantidas)
-- **Lista de motos** (funcionalidade original com AsyncStorage)
-- **Mapa do pátio** mostrando vagas ocupadas e livres
-- **Cadastro de vagas** no pátio
-- **Tela de estatísticas** integrada (vagas locais + API)
+### Outras Telas
+- **Lista de motos** (integrada à API)
+- **Mapa do pátio** mostrando vagas ocupadas e livres (local)
+- **Cadastro de vagas** no pátio (local)
+- **Tela de estatísticas** (local + API)
 
 ## Arquitetura Técnica
 
@@ -87,18 +87,18 @@ src/
 
 ### Tecnologias Utilizadas
 - **React Native** com Expo 53
-- **TypeScript** para tipagem estática
-- **React Navigation** para navegação
-- **AsyncStorage** para persistência local
-- **Expo Vector Icons** para ícones
-- **API .NET** para backend (https://localhost:7054)
+- **TypeScript**
+- **React Navigation**
+- **AsyncStorage** (sessão/tema)
+- **Expo Vector Icons**
+- **API .NET** para backend (https://localhost:7054/swagger)
 
 ## Instruções de Instalação
 
 ### Pré-requisitos
 - Node.js 18+ 
 - Expo CLI
-- API .NET rodando em https://localhost:7054
+- API .NET rodando em https://localhost:7054 (ou http conforme seu ambiente)
 
 ### Instalação
 
@@ -115,8 +115,9 @@ src/
 
 3. **Configure a API**
    - Certifique-se de que a API .NET esteja rodando em `https://localhost:7054`
-   - Verifique os endpoints para Motos e Mecânicos
-   - Configure CORS se necessário
+   - Habilite CORS para as origens do Expo (web e dispositivo)
+   - Se estiver usando certificado de desenvolvimento, confie nele (`dotnet dev-certs https --trust`)
+   - Ajuste a BASE URL do app via variável de ambiente quando necessário (veja abaixo)
 
 4. **Inicie o aplicativo**
    ```bash
@@ -135,26 +136,26 @@ src/
 A aplicação consome os seguintes endpoints da API .NET:
 
 ### Autenticação
-- `POST /api/auth/login` - Login do usuário
-- `POST /api/auth/register` - Registro de usuário
-- `POST /api/auth/logout` - Logout do usuário
+- `POST /api/Auth/login` - Login do usuário
+- `POST /api/Auth/register` - Registro de usuário
+- `POST /api/Auth/logout` - Logout do usuário
 
 ### Oficinas
-- `GET /api/oficinas` - Listar todas as oficinas
-- `GET /api/oficinas/{id}` - Obter oficina por ID
-- `POST /api/oficinas` - Criar nova oficina
-- `PUT /api/oficinas/{id}` - Atualizar oficina
-- `DELETE /api/oficinas/{id}` - Deletar oficina
+- `GET /api/Oficina?page=1&pageSize=50` - Listar oficinas (paginado)
+- `GET /api/Oficina/{id}` - Obter oficina por ID
+- `POST /api/Oficina` - Criar nova oficina
+- `PUT /api/Oficina/{id}` - Atualizar oficina
+- `DELETE /api/Oficina/{id}` - Deletar oficina
 
 ### Mecânicos
-- `GET /api/mecanicos` - Listar todos os mecânicos
-- `GET /api/mecanicos/{id}` - Obter mecânico por ID
-- `POST /api/mecanicos` - Criar novo mecânico
-- `PUT /api/mecanicos/{id}` - Atualizar mecânico
-- `DELETE /api/mecanicos/{id}` - Deletar mecânico
+- `GET /api/Mecanico?page=1&pageSize=50` - Listar mecânicos (paginado)
+- `GET /api/Mecanico/{id}` - Obter mecânico por ID
+- `POST /api/Mecanico` - Criar novo mecânico
+- `PUT /api/Mecanico/{id}` - Atualizar mecânico
+- `DELETE /api/Mecanico/{id}` - Deletar mecânico
 
 ### Depósitos
-- `GET /api/Deposito` - Listar depósitos (paginado)
+- `GET /api/Deposito?page=1&pageSize=50` - Listar depósitos (paginado)
 - `GET /api/Deposito/{id}` - Obter depósito por ID
 - `POST /api/Deposito` - Criar novo depósito
 - `PUT /api/Deposito/{id}` - Atualizar depósito
@@ -189,48 +190,61 @@ public class Mecanico
 }
 ```
 
-## Funcionalidades Implementadas Conforme Critérios
+## Funcionalidades Implementadas Conforme Critérios (Sprint 3)
 
 ### ✅ Telas Funcionais Integradas com API (40 pontos)
-- **2 funcionalidades completas** (Oficinas e Mecânicos)
-- **CRUD completo** para ambas as entidades
-- **Tratamento de formulários** com validações e mensagens de erro
-- **Indicadores de carregamento** em todas as chamadas de rede
+- 2 funcionalidades completas: Oficinas e Mecânicos (CRUD completo: Create/Read/Update/Delete)
+- Formulários com validações, mensagens de erro e feedback ao usuário
+- Indicadores de carregamento em chamadas de rede (Listas e Forms)
 
 ### ✅ Sistema de Login (20 pontos)
-- **Tela de Login** com validações
-- **Tela de Cadastro** com validações completas
-- **Logout funcional** com confirmação
+- Tela de Login com validações e loading
+- Tela de Cadastro com validações e loading
+- Logout funcional com confirmação
 
 ### ✅ Estilização com Tema (15 pontos)
-- **Modo claro e escuro** implementados
-- **Personalização visual** consistente
-- **Material Design guidelines** seguidas
-- **Identidade visual** coerente e criativa
+- Modo claro e escuro implementados (persistência via AsyncStorage)
+- Paleta de cores, tipografia e espaçamentos consistentes
+- Aderência às guidelines do Material Design
+- Identidade visual coerente
 
 ### ✅ Arquitetura de Código (15 pontos)
-- **Organização lógica** de arquivos e componentes
-- **Nomeação clara** e padronizada
-- **Separação de responsabilidades** bem definida
-- **Código limpo** e bem estruturado
-- **Boas práticas React Native** aplicadas
+- Organização lógica (components, contexts, services, screens, types)
+- Nomeação clara e padronizada
+- Separação de responsabilidades bem definida
+- Código limpo e tipado (TypeScript)
+- Boas práticas RN aplicadas
 
 ## Como Testar
 
-### 🔧 Configuração Importante
-O aplicativo está configurado em **MODO SIMULADO** por padrão, funcionando sem necessidade da API. Para ativar a API real:
+### 🔧 Configuração da BASE da API
+- Por padrão, usamos `https://localhost:7054/api` (casando com o Swagger).
+- Para ambientes diferentes, defina a variável `EXPO_PUBLIC_API_BASE_URL` antes de iniciar o app.
 
-1. Abra o arquivo `src/services/ApiService.ts`
-2. Altere `const OFFLINE_MODE = true;` para `const OFFLINE_MODE = false;`
-3. Certifique-se de que sua API .NET esteja rodando em `http://localhost:7054`
+Windows PowerShell (exemplos):
 
-### Autenticação (Modo Simulado)
+```powershell
+# HTTPS (padrão)
+$env:EXPO_PUBLIC_API_BASE_URL = "https://localhost:7054/api"
+npm start
+
+# Somente HTTP (se sua API não usa https em dev)
+$env:EXPO_PUBLIC_API_BASE_URL = "http://localhost:7054/api"
+npm start
+
+# Emulador Android (host do PC no emulador)
+$env:EXPO_PUBLIC_API_BASE_URL = "http://10.0.2.2:7054/api"
+npm start
+
+# Dispositivo físico na mesma rede
+$env:EXPO_PUBLIC_API_BASE_URL = "http://SEU-IP-LOCAL:7054/api"
+npm start
+```
+
+### Autenticação
 1. Abra o app (será direcionado para Login)
-2. **Use as credenciais de teste:**
-   - Email: `teste@moop.com`
-   - Senha: `123456`
-   - Ou clique em "Preencher Automaticamente"
-3. Alternativamente, clique em "Não tem conta? Cadastre-se" para criar uma nova conta
+2. Faça login com usuário já cadastrado na sua API ou use a tela de cadastro
+3. Após login, você será redirecionado para a Home
 
 ### Lista de Motos (Funcionalidade Original)
 1. Na tela inicial, clique em "Lista de Motos"
@@ -264,42 +278,26 @@ O aplicativo está configurado em **MODO SIMULADO** por padrão, funcionando sem
 3. A preferência é salva automaticamente
 
 ### Indicador de Status da API
-- **Verde "API Online"**: A API está respondendo normalmente
-- **Amarelo "Modo Simulado"**: API offline, usando dados simulados
-- Use o botão de refresh para verificar o status novamente
+- Verde "API Online": API respondendo
+- Amarelo "API Offline": API indisponível
+- Use o botão de refresh para verificar novamente
 
 ## Observações Importantes
 
 - Certifique-se de que a API .NET esteja rodando antes de testar as funcionalidades
 - As validações seguem as mesmas regras dos models da API
-- O armazenamento local (AsyncStorage) é usado para manter sessão e preferências
-- Todas as operações de rede possuem tratamento de erro adequado
-- O aplicativo funciona offline para as funcionalidades existentes (mapa, estatísticas locais)
+- O AsyncStorage é usado para sessão e preferências (tema)
+- Todas as operações de rede possuem tratamento de erro e indicadores de carregamento
 
-## Migração para um novo repositório (Plano B)
+## Apresentação (Vídeo)
+- Inclua aqui o link do vídeo demonstrando o app em funcionamento real (emulador ou dispositivo), cobrindo:
+   - Login, Cadastro e Logout
+   - CRUD de Oficinas (Create/Read/Update/Delete)
+   - CRUD de Mecânicos (Create/Read/Update/Delete)
+   - Alternância de Tema (claro/escuro)
+   - Indicador de Status da API
 
-Como a sua API .NET já está em outro repositório, você pode migrar este app Expo para um repositório limpo seguindo estes passos:
-
-1. Crie um repositório vazio no GitHub (ex.: `moop-app-expo`).
-2. Nesta pasta (`MoopApp/`), inicialize o Git e faça o primeiro commit.
-3. Aponte o remoto e publique.
-
-Exemplo de comandos (no PowerShell):
-
-```powershell
-git init
-git add .
-git commit -m "chore: initial import (Expo app)"
-git remote add origin https://github.com/<seu-usuario>/<seu-repo>.git
-git branch -M main
-git push -u origin main
-```
-
-Notas de integração com a API:
-- Mantenha a API .NET no repositório dedicado (já separado).
-- Exponha `GET /api/health` para o health check.
-- Confirme os endpoints (Oficina, Mecanico, Deposito) e o casing: `GET /api/Deposito` (paginado), `GET /api/Deposito/{id}`, `POST /api/Deposito`, `PUT /api/Deposito/{id}`, `DELETE /api/Deposito/{id}`.
-- Ajuste o `OFFLINE_MODE` em `src/services/ApiService.ts` (true = simulado; false = API real).
+Exemplo: [link do vídeo aqui]
 
 URLs e CORS:
 - Expo Web tipicamente roda em `http://localhost:19006` (ou `https://localhost:19006`).

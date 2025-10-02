@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
-import ApiService, { IS_OFFLINE_MODE } from '../services/ApiService';
+import ApiService from '../services/ApiService';
 
 interface ApiStatusProps {
   onToggleMode?: () => void;
@@ -16,14 +16,9 @@ const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
   const checkApiStatus = async () => {
     setIsChecking(true);
     try {
-      if (IS_OFFLINE_MODE) {
-        // Em modo offline, não tente chamar rede; marque como offline
-        setIsOnline(false);
-      } else {
-        // Usar ApiService para verificar saúde (simulado em offline)
-        const result = await ApiService.get<any>('/health');
-        setIsOnline(!!result);
-      }
+  // Usar endpoint real leve para verificar saúde
+  const result = await ApiService.get<any>('/Deposito?page=1&pageSize=1');
+  setIsOnline(!!result);
     } catch (error) {
       setIsOnline(false);
     }
@@ -33,6 +28,8 @@ const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
   useEffect(() => {
     checkApiStatus();
   }, []);
+
+  // Sem alternância de modo: sempre tenta API real
 
   const styles = StyleSheet.create({
     container: {
@@ -57,6 +54,7 @@ const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
       marginLeft: theme.spacing.sm,
       padding: theme.spacing.xs,
     },
+    
   });
 
   return (
@@ -72,7 +70,7 @@ const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
           ? 'Verificando API...'
           : isOnline
           ? 'API Online'
-          : 'Modo Simulado - API Offline'}
+          : 'API Offline'}
       </Text>
       <TouchableOpacity style={styles.button} onPress={checkApiStatus}>
         <Ionicons name="refresh" size={16} color="white" />

@@ -12,7 +12,7 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<{ token: string; user: User }> {
-    return ApiService.post<{ token: string; user: User }>('/auth/login', {
+    return ApiService.post<{ token: string; user: User }>('/Auth/login', {
       email,
       password,
     });
@@ -23,11 +23,11 @@ export class AuthService {
     email: string;
     password: string;
   }): Promise<{ token: string; user: User }> {
-    return ApiService.post<{ token: string; user: User }>('/auth/register', user);
+    return ApiService.post<{ token: string; user: User }>('/Auth/register', user);
   }
 
   async logout(): Promise<void> {
-    return ApiService.post<void>('/auth/logout');
+    return ApiService.post<void>('/Auth/logout');
   }
 }
 
