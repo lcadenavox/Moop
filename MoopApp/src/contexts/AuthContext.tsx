@@ -21,6 +21,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const AUTO_LOGIN = true; // Temporariamente: manter logado por padrão
 
   useEffect(() => {
     checkAuthState();
@@ -30,9 +31,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const savedUser = await AsyncStorage.getItem('user');
       const token = await AsyncStorage.getItem('token');
-
       if (savedUser && token) {
         setUser(JSON.parse(savedUser));
+      } else if (AUTO_LOGIN) {
+        // Sessão temporária sem token (apenas para navegação durante desenvolvimento)
+        const devUser: User = { email: 'dev@moop.local', name: 'Dev User' };
+        setUser(devUser);
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error('Failed to load auth state:', error);
@@ -74,23 +80,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async (): Promise<void> => {
-    try {
-      setIsLoading(true);
-      await AuthService.logout();
-      
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('user');
-      
-      setUser(null);
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Even if API call fails, clear local storage
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('user');
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
+    // Clear local state immediately so UI can proceed, regardless of network state
+    setUser(null);
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+
+    // Attempt best-effort server logout without blocking UI
+    setTimeout(() => {
+      AuthService.logout().catch((error) => {
+        console.warn('Logout API (background) failed:', error?.message || error);
+      });
+    }, 0);
   };
 
   const isAuthenticated = !!user;

@@ -79,12 +79,12 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
       if (isEditing) {
         await MecanicoService.update(mecanico.id, mecanicoData);
         Alert.alert('Sucesso', 'Mecânico atualizado com sucesso', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => navigation.navigate('MecanicoList') }
         ]);
       } else {
         await MecanicoService.create(mecanicoData);
         Alert.alert('Sucesso', 'Mecânico criado com sucesso', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => navigation.navigate('MecanicoList') }
         ]);
       }
     } catch (error) {

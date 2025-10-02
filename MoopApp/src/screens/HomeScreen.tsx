@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,31 +7,42 @@ import ApiStatus from '../components/ApiStatus';
 
 export default function HomeScreen({ navigation }: any) {
   const { theme, isDark, toggleTheme } = useTheme();
-  const { logout, user } = useAuth();
+  const { logout, user, isLoading } = useAuth();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Confirmar Logout',
-      'Deseja realmente sair do aplicativo?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Sair', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-              });
-            } catch (error) {
-              console.error('Logout error:', error);
+    try {
+      Alert.alert(
+        'Confirmar Logout',
+        'Deseja realmente sair do aplicativo?',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          {
+            text: 'Sair',
+            style: 'destructive',
+            onPress: async () => {
+              try {
+                await logout();
+                navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+              } catch (error) {
+                console.error('Logout error:', error);
+                Alert.alert('Erro', 'Não foi possível realizar logout.');
+              }
             }
+          },
+        ]
+      );
+    } catch (e) {
+      // Fallback raríssimo caso Alert falhe no ambiente
+      Alert.alert('Sair', 'Encerrando a sessão...', [
+        {
+          text: 'OK',
+          onPress: async () => {
+            await logout();
+            navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
           }
-        },
-      ]
-    );
+        }
+      ]);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -110,7 +121,11 @@ export default function HomeScreen({ navigation }: any) {
           style={styles.headerButton}
           onPress={handleLogout}
         >
-          <Ionicons name="log-out" size={24} color={theme.colors.error} />
+          {isLoading ? (
+            <ActivityIndicator size="small" color={theme.colors.error} />
+          ) : (
+            <Ionicons name="log-out" size={24} color={theme.colors.error} />
+          )}
         </TouchableOpacity>
       </View>
 

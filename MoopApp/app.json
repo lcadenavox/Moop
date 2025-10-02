@@ -24,6 +24,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "FIREBASE_API_KEY": "AIzaSyDKmI_l2GIbvD43APWzRo9I8gR1nPfsm1A",
+      "FIREBASE_AUTH_DOMAIN": "moop-be288.firebaseapp.com",
+      "FIREBASE_PROJECT_ID": "moop-be288",
+  "FIREBASE_STORAGE_BUCKET": "moop-be288.appspot.com",
+      "FIREBASE_MESSAGING_SENDER_ID": "1043744156721",
+      "FIREBASE_APP_ID": "1:1043744156721:web:0860ea41b38aea62d13910"
     }
   }
 }

@@ -1,6 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
+import { View, ActivityIndicator } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import { ThemeProvider, useTheme } from "./src/contexts/ThemeContext";
@@ -49,14 +50,19 @@ function AppNavigator() {
   };
 
   if (isLoading) {
-    return null; // Could show a loading screen here
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   return (
     <>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <NavigationContainer>
+      <NavigationContainer key={isAuthenticated ? 'auth-nav' : 'guest-nav'}>
         <Stack.Navigator
+          key={isAuthenticated ? 'auth-stack' : 'guest-stack'}
           initialRouteName={isAuthenticated ? "Home" : "Login"}
           screenOptions={screenOptions}
         >

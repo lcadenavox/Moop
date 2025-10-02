@@ -130,12 +130,12 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
       if (isEditing) {
         await OficinaService.update(oficina.id, oficinaData);
         Alert.alert('Sucesso', 'Oficina atualizada com sucesso', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => navigation.navigate('OficinaList') }
         ]);
       } else {
         await OficinaService.create(oficinaData);
         Alert.alert('Sucesso', 'Oficina criada com sucesso', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => navigation.navigate('OficinaList') }
         ]);
       }
     } catch (error) {

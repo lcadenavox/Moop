@@ -25,6 +25,11 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<T> {
     try {
+      // Apply a default timeout to avoid hanging requests
+      const controller = new AbortController();
+      const timeoutMs = 10000; // 10s default timeout
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
       const token = await AsyncStorage.getItem('token');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -37,8 +42,11 @@ class ApiService {
       const url = `${API_BASE_URL}${endpoint}`;
       const response = await fetch(url, {
         ...options,
+        signal: controller.signal,
         headers,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         let message = `HTTP error! status: ${response.status}`;
@@ -60,6 +68,9 @@ class ApiService {
         return (text as any) as T;
       }
     } catch (error) {
+      if ((error as any)?.name === 'AbortError') {
+        throw new ApiError('Tempo de requisição excedido. Verifique sua conexão com a API.');
+      }
       if (error instanceof ApiError) throw error;
       // Repassar erros de rede; ajuste EXPO_PUBLIC_API_BASE_URL se necessário (ex.: https/http)
       throw error as Error;

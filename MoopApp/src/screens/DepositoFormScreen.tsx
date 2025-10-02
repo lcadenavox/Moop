@@ -77,12 +77,12 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
       if (isEditing) {
         await DepositoService.update(deposito.id, depositoData);
         Alert.alert('Sucesso', 'Depósito atualizado com sucesso', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => navigation.navigate('DepositoList') }
         ]);
       } else {
         await DepositoService.create(depositoData);
         Alert.alert('Sucesso', 'Depósito criado com sucesso', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => navigation.navigate('DepositoList') }
         ]);
       }
     } catch (error) {

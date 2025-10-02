@@ -136,40 +136,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
       color: theme.colors.primary,
       fontSize: 16,
     },
-    testCredentials: {
-      marginTop: theme.spacing.xl,
-      padding: theme.spacing.md,
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.borderRadius.md,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    testCredentialsTitle: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: theme.spacing.sm,
-      textAlign: 'center',
-    },
-    testCredentialsText: {
-      fontSize: 12,
-      color: theme.colors.textSecondary,
-      textAlign: 'center',
-      marginBottom: theme.spacing.xs,
-    },
-    fillTestButton: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.borderRadius.sm,
-      paddingVertical: theme.spacing.sm,
-      paddingHorizontal: theme.spacing.md,
-      marginTop: theme.spacing.sm,
-    },
-    fillTestButtonText: {
-      color: 'white',
-      fontSize: 12,
-      fontWeight: '500',
-      textAlign: 'center',
-    },
+    // Test credentials removed
   });
 
   return (
@@ -232,20 +199,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           <Text style={styles.linkText}>Não tem conta? Cadastre-se</Text>
         </TouchableOpacity>
 
-        <View style={styles.testCredentials}>
-          <Text style={styles.testCredentialsTitle}>Credenciais de Teste:</Text>
-          <Text style={styles.testCredentialsText}>Email: teste@moop.com</Text>
-          <Text style={styles.testCredentialsText}>Senha: 123456</Text>
-          <TouchableOpacity
-            style={styles.fillTestButton}
-            onPress={() => {
-              setEmail('teste@moop.com');
-              setPassword('123456');
-            }}
-          >
-            <Text style={styles.fillTestButtonText}>Preencher Automaticamente</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Test credentials removed as requested */}
       </ScrollView>
     </View>
   );
