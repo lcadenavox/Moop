@@ -30,15 +30,15 @@ interface Theme {
 
 const lightTheme: Theme = {
   colors: {
-    primary: '#2196F3',
-    secondary: '#03DAC6',
+    primary: '#0CAF50',
+    secondary: '#00BFA5',
     background: '#FFFFFF',
     surface: '#F5F5F5',
     text: '#000000',
     textSecondary: '#757575',
     border: '#E0E0E0',
     error: '#F44336',
-    success: '#4CAF50',
+    success: '#16A34A',
     warning: '#FF9800',
   },
   spacing: {
@@ -57,15 +57,15 @@ const lightTheme: Theme = {
 
 const darkTheme: Theme = {
   colors: {
-    primary: '#90CAF9',
-    secondary: '#A7FFEB',
+    primary: '#22C55E',
+    secondary: '#14B8A6',
     background: '#121212',
     surface: '#1E1E1E',
     text: '#FFFFFF',
     textSecondary: '#B3B3B3',
     border: '#333333',
     error: '#CF6679',
-    success: '#81C784',
+    success: '#22C55E',
     warning: '#FFB74D',
   },
   spacing: {

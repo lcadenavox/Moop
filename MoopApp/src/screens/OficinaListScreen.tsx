@@ -73,7 +73,9 @@ const OficinaListScreen: React.FC<OficinaListScreenProps> = ({ navigation }) => 
     try {
       await OficinaService.delete(id);
       setOficinas(prev => prev.filter(oficina => oficina.id !== id));
-      Alert.alert('Sucesso', 'Oficina excluída com sucesso');
+      Alert.alert('Sucesso', 'Oficina excluída com sucesso', [
+        { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) }
+      ]);
     } catch (error) {
       if (error instanceof ApiError) {
         Alert.alert('Erro', error.message);

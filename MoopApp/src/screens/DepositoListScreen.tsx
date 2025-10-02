@@ -73,7 +73,9 @@ const DepositoListScreen: React.FC<DepositoListScreenProps> = ({ navigation }) =
     try {
       await DepositoService.delete(id);
       setDepositos(prev => prev.filter(d => d.id !== id));
-      Alert.alert('Sucesso', 'Depósito excluído com sucesso');
+      Alert.alert('Sucesso', 'Depósito excluído com sucesso', [
+        { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) }
+      ]);
     } catch (error) {
       if (error instanceof ApiError) {
         Alert.alert('Erro', error.message);

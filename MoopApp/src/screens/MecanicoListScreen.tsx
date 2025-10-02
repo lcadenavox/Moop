@@ -73,7 +73,9 @@ const MecanicoListScreen: React.FC<MecanicoListScreenProps> = ({ navigation }) =
     try {
       await MecanicoService.delete(id);
       setMecanicos(prev => prev.filter(mecanico => mecanico.id !== id));
-      Alert.alert('Sucesso', 'Mecânico excluído com sucesso');
+      Alert.alert('Sucesso', 'Mecânico excluído com sucesso', [
+        { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) }
+      ]);
     } catch (error) {
       if (error instanceof ApiError) {
         Alert.alert('Erro', error.message);

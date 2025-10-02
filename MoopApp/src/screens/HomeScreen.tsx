@@ -131,7 +131,7 @@ export default function HomeScreen({ navigation }: any) {
 
       <TouchableOpacity
         style={styles.botao}
-        onPress={() => navigation.navigate("Lista de Motos")}
+        onPress={() => navigation.navigate("MotoList")}
       >
         <Ionicons name="list" size={20} color={theme.colors.text} />
         <Text style={styles.textoBotao}>Lista de Motos</Text>

@@ -73,7 +73,9 @@ const MotoListScreen: React.FC<MotoListScreenProps> = ({ navigation }) => {
     try {
       await MotoService.delete(id);
       setMotos(prev => prev.filter(moto => moto.id !== id));
-      Alert.alert('Sucesso', 'Moto excluída com sucesso');
+      Alert.alert('Sucesso', 'Moto excluída com sucesso', [
+        { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) }
+      ]);
     } catch (error) {
       if (error instanceof ApiError) {
         Alert.alert('Erro', error.message);

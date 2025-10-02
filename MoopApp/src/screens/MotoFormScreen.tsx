@@ -90,12 +90,12 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
       if (isEditing) {
         await MotoService.update(moto.id, motoData);
         Alert.alert('Sucesso', 'Moto atualizada com sucesso', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => navigation.navigate('MotoList') }
         ]);
       } else {
         await MotoService.create(motoData);
         Alert.alert('Sucesso', 'Moto criada com sucesso', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => navigation.navigate('MotoList') }
         ]);
       }
     } catch (error) {

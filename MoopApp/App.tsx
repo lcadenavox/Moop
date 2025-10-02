@@ -25,6 +25,9 @@ import OficinaDetailScreen from "./src/screens/OficinaDetailScreen";
 import DepositoListScreen from "./src/screens/DepositoListScreen";
 import DepositoFormScreen from "./src/screens/DepositoFormScreen";
 import DepositoDetailScreen from "./src/screens/DepositoDetailScreen";
+import MotoListScreen from "./src/screens/MotoListScreen";
+import MotoFormScreen from "./src/screens/MotoFormScreen";
+import MotoDetailScreen from "./src/screens/MotoDetailScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -131,6 +134,23 @@ function AppNavigator() {
                 name="DepositoDetail" 
                 component={DepositoDetailScreen}
                 options={{ title: 'Detalhes do Depósito' }}
+              />
+
+              {/* New Moto CRUD screens */}
+              <Stack.Screen 
+                name="MotoList" 
+                component={MotoListScreen}
+                options={{ title: 'Motos' }}
+              />
+              <Stack.Screen 
+                name="MotoForm" 
+                component={MotoFormScreen}
+                options={{ title: 'Nova Moto' }}
+              />
+              <Stack.Screen 
+                name="MotoDetail" 
+                component={MotoDetailScreen}
+                options={{ title: 'Detalhes da Moto' }}
               />
             </>
           ) : (
