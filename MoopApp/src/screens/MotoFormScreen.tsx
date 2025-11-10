@@ -10,8 +10,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import { Moto } from '../types';
 import MotoService from '../services/MotoService';
+import { notifyCreation } from '../services/NotificationsService';
 import { ApiError } from '../services/ApiService';
 
 interface MotoFormScreenProps {
@@ -22,6 +24,7 @@ interface MotoFormScreenProps {
 const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) => {
   const { theme } = useTheme();
   const { moto } = route.params || {};
+  const { t } = useTranslation();
   const isEditing = !!moto;
 
   const [marca, setMarca] = useState(moto?.marca || '');
@@ -35,7 +38,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
 
   useEffect(() => {
     navigation.setOptions({
-      title: isEditing ? 'Editar Moto' : 'Nova Moto',
+      title: isEditing ? t('moto.form.titleEdit') : t('moto.form.titleNew'),
     });
   }, [navigation, isEditing]);
 
@@ -49,26 +52,26 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
 
     // Marca validation
     if (!marca.trim()) {
-      setMarcaError('Marca é obrigatória');
+      setMarcaError(t('moto.form.errorMarca'));
       isValid = false;
     }
 
     // Modelo validation
     if (!modelo.trim()) {
-      setModeloError('Modelo é obrigatório');
+      setModeloError(t('moto.form.errorModelo'));
       isValid = false;
     }
 
     // Ano validation
     const anoNumber = parseInt(ano);
     if (!ano.trim()) {
-      setAnoError('Ano é obrigatório');
+      setAnoError(t('moto.form.errorAnoRequired'));
       isValid = false;
     } else if (isNaN(anoNumber)) {
-      setAnoError('Ano deve ser um número válido');
+      setAnoError(t('moto.form.errorAnoNumber'));
       isValid = false;
     } else if (anoNumber < 1900 || anoNumber > 2100) {
-      setAnoError('Ano deve estar entre 1900 e 2100');
+      setAnoError(t('moto.form.errorAnoRange'));
       isValid = false;
     }
 
@@ -89,20 +92,22 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
 
       if (isEditing) {
         await MotoService.update(moto.id, motoData);
-        Alert.alert('Sucesso', 'Moto atualizada com sucesso', [
+        Alert.alert(t('common.success'), t('moto.form.updated'), [
           { text: 'OK', onPress: () => navigation.navigate('MotoList') }
         ]);
       } else {
         await MotoService.create(motoData);
-        Alert.alert('Sucesso', 'Moto criada com sucesso', [
+        // Notificação push/local localizada
+        notifyCreation('moto', { marca: motoData.marca, modelo: motoData.modelo }).catch(() => {});
+        Alert.alert(t('common.success'), t('moto.form.created'), [
           { text: 'OK', onPress: () => navigation.navigate('MotoList') }
         ]);
       }
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro', error.message);
+        Alert.alert(t('common.error'), error.message);
       } else {
-        Alert.alert('Erro', 'Falha ao salvar moto');
+        Alert.alert(t('common.error'), t('moto.form.errorSave', { defaultValue: 'Falha ao salvar moto' }));
       }
     } finally {
       setLoading(false);
@@ -182,7 +187,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Marca</Text>
+          <Text style={styles.label}>{t('moto.form.marca')}</Text>
           <TextInput
             style={[styles.input, marcaError ? styles.inputError : null]}
             value={marca}
@@ -190,7 +195,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
               setMarca(text);
               if (marcaError) setMarcaError('');
             }}
-            placeholder="Digite a marca da moto"
+            placeholder={t('moto.form.placeholderMarca')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
           />
@@ -198,7 +203,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Modelo</Text>
+          <Text style={styles.label}>{t('moto.form.modelo')}</Text>
           <TextInput
             style={[styles.input, modeloError ? styles.inputError : null]}
             value={modelo}
@@ -206,7 +211,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
               setModelo(text);
               if (modeloError) setModeloError('');
             }}
-            placeholder="Digite o modelo da moto"
+            placeholder={t('moto.form.placeholderModelo')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
           />
@@ -214,7 +219,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ano</Text>
+          <Text style={styles.label}>{t('moto.form.ano')}</Text>
           <TextInput
             style={[styles.input, anoError ? styles.inputError : null]}
             value={ano}
@@ -222,7 +227,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
               setAno(text);
               if (anoError) setAnoError('');
             }}
-            placeholder="Digite o ano da moto"
+            placeholder={t('moto.form.placeholderAno')}
             placeholderTextColor={theme.colors.textSecondary}
             keyboardType="numeric"
             maxLength={4}
@@ -235,7 +240,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
             style={[styles.button, styles.secondaryButton]}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.secondaryButtonText}>Cancelar</Text>
+            <Text style={styles.secondaryButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -251,7 +256,7 @@ const MotoFormScreen: React.FC<MotoFormScreenProps> = ({ navigation, route }) =>
               <ActivityIndicator color="white" />
             ) : (
               <Text style={styles.primaryButtonText}>
-                {isEditing ? 'Atualizar' : 'Salvar'}
+                {isEditing ? t('common.update') : t('common.save')}
               </Text>
             )}
           </TouchableOpacity>

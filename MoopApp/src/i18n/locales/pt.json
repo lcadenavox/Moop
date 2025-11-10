@@ -13,6 +13,12 @@
     "yes": "Sim",
     "no": "Não"
   },
+  "push": {
+    "newMotoTitle": "Nova Moto",
+    "newMotoBody": "Moto {{marca}} {{modelo}} criada com sucesso.",
+    "newDepositoTitle": "Novo Depósito",
+    "newDepositoBody": "Depósito {{nome}} criado com sucesso."
+  },
   "nav": {
     "appTitle": "Moop App",
     "map": "Mapa do Pátio",

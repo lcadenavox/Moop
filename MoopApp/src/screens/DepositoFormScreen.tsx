@@ -13,7 +13,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { Deposito } from '../types';
 import DepositoService from '../services/DepositoService';
+import { notifyCreation } from '../services/NotificationsService';
 import { ApiError } from '../services/ApiService';
+import { useTranslation } from 'react-i18next';
+import { createDepositoSchema, validateWith } from '../validation/schemas';
 
 interface DepositoFormScreenProps {
   navigation: any;
@@ -23,6 +26,7 @@ interface DepositoFormScreenProps {
 const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, route }) => {
   const { theme } = useTheme();
   const { deposito } = route.params || {};
+  const { t } = useTranslation();
   const isEditing = !!deposito;
 
   const [nome, setNome] = useState<string>(deposito?.nome || '');
@@ -34,37 +38,20 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
 
   useEffect(() => {
     navigation.setOptions({
-      title: isEditing ? 'Editar Depósito' : 'Novo Depósito',
+      title: isEditing ? t('deposito.form.titleEdit') : t('deposito.form.titleNew'),
     });
-  }, [navigation, isEditing]);
-
-  const validateForm = (): boolean => {
-    let isValid = true;
-
-    setNomeError('');
-    setEnderecoError('');
-
-    if (!nome.trim()) {
-      setNomeError('Nome é obrigatório');
-      isValid = false;
-    } else if (nome.trim().length < 2) {
-      setNomeError('Nome deve ter pelo menos 2 caracteres');
-      isValid = false;
-    }
-
-    if (!endereco.trim()) {
-      setEnderecoError('Endereço é obrigatório');
-      isValid = false;
-    } else if (endereco.trim().length < 5) {
-      setEnderecoError('Endereço deve ter pelo menos 5 caracteres');
-      isValid = false;
-    }
-
-    return isValid;
-  };
+  }, [navigation, isEditing, t]);
 
   const handleSave = async () => {
-    if (!validateForm()) return;
+    setNomeError('');
+    setEnderecoError('');
+    const schema = createDepositoSchema(t);
+    const result = await validateWith(schema, { nome, endereco });
+    if (!result.valid) {
+      setNomeError(result.errors.nome || '');
+      setEnderecoError(result.errors.endereco || '');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -76,20 +63,22 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
 
       if (isEditing) {
         await DepositoService.update(deposito.id, depositoData);
-        Alert.alert('Sucesso', 'Depósito atualizado com sucesso', [
-          { text: 'OK', onPress: () => navigation.navigate('DepositoList') }
+        Alert.alert(t('common.success'), t('deposito.form.updated'), [
+          { text: t('common.ok'), onPress: () => navigation.navigate('DepositoList') }
         ]);
       } else {
         await DepositoService.create(depositoData);
-        Alert.alert('Sucesso', 'Depósito criado com sucesso', [
-          { text: 'OK', onPress: () => navigation.navigate('DepositoList') }
+        // Notificação push/local localizada
+        notifyCreation('deposito', { nome: depositoData.nome }).catch(() => {});
+        Alert.alert(t('common.success'), t('deposito.form.created'), [
+          { text: t('common.ok'), onPress: () => navigation.navigate('DepositoList') }
         ]);
       }
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro', error.message);
+        Alert.alert(t('common.error'), error.message);
       } else {
-        Alert.alert('Erro', 'Falha ao salvar depósito');
+        Alert.alert(t('common.error'), t('deposito.form.errorSave', 'Falha ao salvar depósito'));
       }
     } finally {
       setLoading(false);
@@ -169,7 +158,7 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Nome do Depósito</Text>
+          <Text style={styles.label}>{t('deposito.form.nome')}</Text>
           <TextInput
             style={[styles.input, nomeError ? styles.inputError : null]}
             value={nome}
@@ -177,7 +166,7 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
               setNome(text);
               if (nomeError) setNomeError('');
             }}
-            placeholder="Digite o nome do depósito"
+            placeholder={t('deposito.form.placeholderNome')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
           />
@@ -185,7 +174,7 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Endereço</Text>
+          <Text style={styles.label}>{t('deposito.form.endereco')}</Text>
           <TextInput
             style={[styles.input, enderecoError ? styles.inputError : null]}
             value={endereco}
@@ -193,7 +182,7 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
               setEndereco(text);
               if (enderecoError) setEnderecoError('');
             }}
-            placeholder="Digite o endereço completo"
+            placeholder={t('deposito.form.placeholderEndereco')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
             multiline
@@ -206,7 +195,7 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
             style={[styles.button, styles.secondaryButton]}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.secondaryButtonText}>Cancelar</Text>
+            <Text style={styles.secondaryButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -222,7 +211,7 @@ const DepositoFormScreen: React.FC<DepositoFormScreenProps> = ({ navigation, rou
               <ActivityIndicator color="white" />
             ) : (
               <Text style={styles.primaryButtonText}>
-                {isEditing ? 'Atualizar' : 'Salvar'}
+                {isEditing ? t('common.update') : t('common.save')}
               </Text>
             )}
           </TouchableOpacity>
