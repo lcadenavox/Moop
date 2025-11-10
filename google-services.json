@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "767911403355",
+    "project_id": "moopapp-27a95",
+    "storage_bucket": "moopapp-27a95.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767911403355:android:e3417404a5383a6621047e",
+        "android_client_info": {
+          "package_name": "com.MoopApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmfljhqXShwydWgOJEnymYDpdHTU2yTMc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
