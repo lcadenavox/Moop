@@ -1,23 +1,36 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Detecta se estamos em desenvolvimento web
-const isWeb = typeof window !== 'undefined';
-const isDev = process.env.NODE_ENV === 'development';
+// =============================
+// Configuração de Base da API
+// =============================
+// Você pode sobrescrever a base via variável de ambiente Expo:
+//   EXPO_PUBLIC_API_BASE_URL   -> ex: https://192.168.0.10:7054/api  (sem versão)
+//   EXPO_PUBLIC_API_VERSION    -> ex: v1 (não incluir barras)
+// Ou simplesmente definir a base já incluindo a versão:
+//   EXPO_PUBLIC_API_BASE_URL=https://192.168.0.10:7054/api/v1
+// Caso a versão esteja definida separadamente ela será concatenada.
+// Screenshot do Swagger mostra rotas em /api/v1/..., então sem definir nada
+// o app chamaria /api/..., gerando 404. Ajuste uma das variáveis conforme necessidade.
 
-// Permite sobrescrever via variável de ambiente (Expo): EXPO_PUBLIC_API_BASE_URL
 const ENV_API_BASE = (process.env as any)?.EXPO_PUBLIC_API_BASE_URL as string | undefined;
+const ENV_API_VERSION = (process.env as any)?.EXPO_PUBLIC_API_VERSION as string | undefined;
 
-// Padrão seguro: Web usa HTTPS por padrão (para casar com Swagger em https). Native mantém HTTPS também.
-// Se precisar HTTP (em emuladores), configure EXPO_PUBLIC_API_BASE_URL.
+// Padrão seguro: HTTPS no localhost (compatível com Swagger dev cert).
 const DEFAULT_BASE = 'https://localhost:7054/api';
-const API_BASE_URL = (ENV_API_BASE && ENV_API_BASE.trim().length > 0)
+const RAW_BASE = (ENV_API_BASE && ENV_API_BASE.trim().length > 0)
   ? ENV_API_BASE.replace(/\/$/, '')
   : DEFAULT_BASE;
 
-export interface ApiError {
-  message: string;
-  status?: number;
-}
+// Só adiciona a versão se o base ainda não a contém e a versão foi especificada.
+const hasVersionEnv = !!(ENV_API_VERSION && ENV_API_VERSION.trim().length > 0);
+const versionClean = hasVersionEnv ? ENV_API_VERSION!.replace(/^\/*|\/*$/g, '') : '';
+const API_VERSION_SEGMENT = hasVersionEnv ? `/${versionClean}` : '';
+
+const alreadyHasVersion = hasVersionEnv
+  ? new RegExp(`/(?:${versionClean})(?:/|$)`).test(RAW_BASE)
+  : true; // se não há versão a adicionar, consideramos que já está ok
+
+const API_BASE_URL = alreadyHasVersion ? RAW_BASE : `${RAW_BASE}${API_VERSION_SEGMENT}`;
 
 class ApiService {
   private async request<T>(
@@ -55,7 +68,9 @@ class ApiService {
           if (err && (err.message || err.title)) {
             message = err.message || err.title;
           }
-        } catch {}
+        } catch {
+          // ignore: backend may not return JSON on errors
+        }
         throw new ApiError(message, response.status);
       }
 

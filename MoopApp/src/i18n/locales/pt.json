@@ -1,0 +1,237 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "update": "Atualizar",
+    "success": "Sucesso",
+    "error": "Erro",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "confirm": "Confirmar",
+    "ok": "OK",
+    "yes": "Sim",
+    "no": "Não"
+  },
+  "nav": {
+    "appTitle": "Moop App",
+    "map": "Mapa do Pátio",
+    "bikeList": "Lista de Motos",
+    "registerSlot": "Cadastro de Vaga",
+    "stats": "Estatísticas",
+    "mecanicos": "Mecânicos",
+    "mecanicoNew": "Novo Mecânico",
+    "mecanicoDetails": "Detalhes do Mecânico",
+    "oficinas": "Oficinas",
+    "oficinaNew": "Nova Oficina",
+    "oficinaDetails": "Detalhes da Oficina",
+    "depositos": "Depósitos",
+    "depositoNew": "Novo Depósito",
+    "depositoDetails": "Detalhes do Depósito",
+    "motos": "Motos",
+    "motoNew": "Nova Moto",
+    "motoDetails": "Detalhes da Moto",
+    "login": "Login",
+    "register": "Cadastro"
+  },
+  "apiStatus": {
+    "checking": "Verificando API...",
+    "online": "API Online",
+    "offline": "API Offline",
+    "authRequired": "API Online (requer autenticação)",
+    "refresh": "Atualizar"
+  },
+  "moto": {
+    "list": {
+      "title": "Motos",
+      "empty": "Nenhuma moto cadastrada.\nToque no botão + para adicionar."
+    },
+    "form": {
+      "titleNew": "Nova Moto",
+      "titleEdit": "Editar Moto",
+      "marca": "Marca",
+      "modelo": "Modelo",
+      "ano": "Ano",
+      "placeholderMarca": "Digite a marca da moto",
+      "placeholderModelo": "Digite o modelo da moto",
+      "placeholderAno": "Digite o ano da moto",
+      "errorMarca": "Marca é obrigatória",
+      "errorModelo": "Modelo é obrigatório",
+      "errorAnoRequired": "Ano é obrigatório",
+      "errorAnoNumber": "Ano deve ser um número válido",
+      "errorAnoRange": "Ano deve estar entre 1900 e 2100",
+      "created": "Moto criada com sucesso",
+      "updated": "Moto atualizada com sucesso",
+      "loading": "Carregando motos..."
+    },
+    "delete": {
+      "title": "Confirmar Exclusão",
+      "message": "Deseja excluir a moto {{marca}} {{modelo}}?",
+      "success": "Moto excluída com sucesso"
+    }
+  }
+  ,
+  "auth": {
+    "common": {
+      "errorEmailRequired": "Email é obrigatório",
+      "errorEmailInvalid": "Email inválido",
+      "errorPasswordRequired": "Senha é obrigatória",
+      "errorPasswordMin": "Senha deve ter pelo menos 6 caracteres"
+    },
+    "login": {
+      "title": "Entrar",
+      "email": "Email",
+      "password": "Senha",
+      "placeholderEmail": "Digite seu email",
+      "placeholderPassword": "Digite sua senha",
+      "action": "Entrar",
+      "linkRegister": "Não tem conta? Cadastre-se",
+      "errorTitle": "Erro de Login",
+      "unexpected": "Ocorreu um erro inesperado. Tente novamente."
+    },
+    "register": {
+      "title": "Cadastrar",
+      "name": "Nome",
+      "email": "Email",
+      "password": "Senha",
+      "confirmPassword": "Confirmar Senha",
+      "placeholderName": "Digite seu nome",
+      "placeholderEmail": "Digite seu email",
+      "placeholderPassword": "Digite sua senha",
+      "placeholderConfirmPassword": "Confirme sua senha",
+      "action": "Cadastrar",
+      "linkLogin": "Já tem conta? Faça login",
+      "successTitle": "Sucesso",
+      "successMessage": "Conta criada com sucesso!",
+      "errorTitle": "Erro de Cadastro",
+      "errorNameRequired": "Nome é obrigatório",
+      "errorNameMin": "Nome deve ter pelo menos 2 caracteres",
+      "errorConfirmRequired": "Confirmação de senha é obrigatória",
+      "errorPasswordsMismatch": "Senhas não coincidem"
+    },
+    "logout": {
+      "confirmTitle": "Confirmar Logout",
+      "confirmMessage": "Deseja realmente sair do aplicativo?",
+      "cancel": "Cancelar",
+      "action": "Sair",
+      "fallbackTitle": "Sair",
+      "fallbackMessage": "Encerrando a sessão...",
+      "error": "Não foi possível realizar logout."
+    }
+  },
+  "deposito": {
+    "list": {
+      "loading": "Carregando depósitos...",
+      "empty": "Nenhum depósito cadastrado.\nToque no botão + para adicionar."
+    },
+    "form": {
+      "titleNew": "Novo Depósito",
+      "titleEdit": "Editar Depósito",
+      "nome": "Nome do Depósito",
+      "endereco": "Endereço",
+      "placeholderNome": "Digite o nome do depósito",
+      "placeholderEndereco": "Digite o endereço completo",
+      "errorNomeRequired": "Nome é obrigatório",
+      "errorNomeMin": "Nome deve ter pelo menos 2 caracteres",
+      "errorEnderecoRequired": "Endereço é obrigatório",
+      "errorEnderecoMin": "Endereço deve ter pelo menos 5 caracteres",
+      "created": "Depósito criado com sucesso",
+      "updated": "Depósito atualizado com sucesso"
+    },
+    "delete": {
+      "title": "Confirmar Exclusão",
+      "message": "Deseja excluir o depósito {{nome}}?",
+      "success": "Depósito excluído com sucesso"
+    }
+  }
+  ,
+  "mecanico": {
+    "form": {
+      "titleNew": "Novo Mecânico",
+      "titleEdit": "Editar Mecânico",
+      "nome": "Nome",
+      "especialidade": "Especialidade",
+      "placeholderNome": "Digite o nome do mecânico",
+      "placeholderEspecialidade": "Digite a especialidade do mecânico",
+      "errorNomeRequired": "Nome é obrigatório",
+      "errorNomeMin": "Nome deve ter pelo menos 2 caracteres",
+      "errorEspecialidadeRequired": "Especialidade é obrigatória",
+      "errorEspecialidadeMin": "Especialidade deve ter pelo menos 2 caracteres",
+      "created": "Mecânico criado com sucesso",
+      "updated": "Mecânico atualizado com sucesso"
+    },
+    "delete": {
+      "title": "Confirmar Exclusão",
+      "message": "Deseja excluir o mecânico {{nome}}?",
+      "success": "Mecânico excluído com sucesso"
+    }
+  },
+  "oficina": {
+    "form": {
+      "titleNew": "Nova Oficina",
+      "titleEdit": "Editar Oficina",
+      "nome": "Nome da Oficina",
+      "endereco": "Endereço",
+      "telefone": "Telefone",
+      "especialidades": "Especialidades",
+      "placeholderNome": "Digite o nome da oficina",
+      "placeholderEndereco": "Digite o endereço completo",
+      "placeholderTelefone": "(11) 99999-9999",
+      "errorNomeRequired": "Nome é obrigatório",
+      "errorNomeMin": "Nome deve ter pelo menos 2 caracteres",
+      "errorEnderecoRequired": "Endereço é obrigatório",
+      "errorEnderecoMin": "Endereço deve ter pelo menos 5 caracteres",
+      "errorTelefoneRequired": "Telefone é obrigatório",
+      "errorTelefoneDigits": "Telefone deve ter pelo menos 10 dígitos",
+      "errorEspecialidadesMin": "Selecione pelo menos uma especialidade",
+      "created": "Oficina criada com sucesso",
+      "updated": "Oficina atualizada com sucesso"
+    },
+    "delete": {
+      "title": "Confirmar Exclusão",
+      "message": "Deseja excluir a oficina {{nome}}?",
+      "success": "Oficina excluída com sucesso"
+    },
+    "especialidadesOptions": [
+      "Motor","Transmissão","Freios","Suspensão","Elétrica","Ar Condicionado","Carroceria","Pintura","Vidros","Pneus"
+    ]
+  },
+  "slot": {
+    "form": {
+      "title": "Cadastrar Nova Vaga",
+      "vaga": "Vaga",
+      "modelo": "Modelo da Moto",
+      "placa": "Placa",
+      "cor": "Cor da Moto",
+      "observacoes": "Observações (opcional)",
+      "placeholderVaga": "Digite a vaga (ex: B2)",
+      "placeholderModelo": "Modelo da Moto",
+      "placeholderPlaca": "Placa",
+      "placeholderCor": "Cor da Moto",
+      "placeholderObservacoes": "Observações (opcional)",
+      "action": "Salvar",
+      "errorVagaRequired": "Vaga é obrigatória",
+      "errorModeloRequired": "Modelo é obrigatório",
+      "errorPlacaRequired": "Placa é obrigatória",
+      "errorCorRequired": "Cor é obrigatória",
+      "success": "Moto cadastrada com sucesso!",
+      "errorGeneric": "Erro ao cadastrar a moto. Tente novamente.",
+      "vagaOcupada": "A vaga {{vaga}} já está ocupada pela moto \"{{modelo}}\".",
+      "fillAll": "Preencha todos os campos obrigatórios corretamente."
+    },
+    "modal": {
+      "ok": "OK"
+    }
+  }
+  ,
+  "home": {
+    "welcome": "Bem-vindo à Moop",
+    "hello": "Olá, {{name}}!",
+    "map": "Mapa do Pátio",
+    "manageOficinas": "Gerenciar Oficinas",
+    "manageMecanicos": "Gerenciar Mecânicos",
+    "manageDepositos": "Gerenciar Depósitos",
+    "registerSlot": "Cadastrar Nova Vaga",
+    "stats": "Estatísticas"
+  }
+}

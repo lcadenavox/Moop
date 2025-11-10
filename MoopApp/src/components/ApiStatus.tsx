@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import ApiService from '../services/ApiService';
 
 interface ApiStatusProps {
@@ -10,19 +11,53 @@ interface ApiStatusProps {
 
 const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const [isOnline, setIsOnline] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [authIssue, setAuthIssue] = useState(false);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   const checkApiStatus = async () => {
     setIsChecking(true);
+    setAuthIssue(false);
+    setLastError(null);
     try {
-  // Usar endpoint real leve para verificar saúde
-  const result = await ApiService.get<any>('/Deposito?page=1&pageSize=1');
-  setIsOnline(!!result);
-    } catch (error) {
-      setIsOnline(false);
+      // Primeiro tenta um endpoint público de health se existir
+      try {
+        const health = await ApiService.get<any>('/health');
+        if (health || health === '') {
+          setIsOnline(true);
+          setIsChecking(false);
+          return;
+        }
+      } catch (e: any) {
+        // Ignora 404 (backend pode não ter /health) e segue para fallback
+        if (e?.status && e.status >= 500) {
+          // Se servidor respondeu 5xx sabemos que existe, mas está com erro.
+          setIsOnline(false);
+          setLastError(`${e.status}`);
+          setIsChecking(false);
+          return;
+        }
+      }
+
+      // Fallback: usar listagem de depósitos paginada (pode exigir auth)
+      try {
+        const result = await ApiService.get<any>('/Deposito?page=1&pageSize=1');
+        setIsOnline(!!result);
+      } catch (err: any) {
+        // Se receber 401 ou 403 consideramos API alcançável porém requer login
+        if (err?.status === 401 || err?.status === 403) {
+          setIsOnline(true);
+          setAuthIssue(true);
+        } else {
+          setIsOnline(false);
+          if (err?.status) setLastError(String(err.status));
+        }
+      }
+    } finally {
+      setIsChecking(false);
     }
-    setIsChecking(false);
   };
 
   useEffect(() => {
@@ -35,7 +70,7 @@ const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
     container: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: isOnline ? theme.colors.success : theme.colors.warning,
+  backgroundColor: isOnline ? (authIssue ? theme.colors.warning : theme.colors.success) : theme.colors.error,
       paddingHorizontal: theme.spacing.md,
       paddingVertical: theme.spacing.sm,
       borderRadius: theme.borderRadius.sm,
@@ -67,10 +102,13 @@ const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
       />
       <Text style={styles.text}>
         {isChecking
-          ? 'Verificando API...'
+          ? t('apiStatus.checking')
           : isOnline
-          ? 'API Online'
-          : 'API Offline'}
+          ? authIssue
+            ? t('apiStatus.authRequired')
+            : t('apiStatus.online')
+          : t('apiStatus.offline')}
+        {lastError && !isChecking && !authIssue ? ` (${lastError})` : ''}
       </Text>
       <TouchableOpacity style={styles.button} onPress={checkApiStatus}>
         <Ionicons name="refresh" size={16} color="white" />

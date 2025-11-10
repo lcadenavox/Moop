@@ -1,0 +1,237 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "update": "Actualizar",
+    "success": "Éxito",
+    "error": "Error",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "confirm": "Confirmar",
+    "ok": "OK",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "nav": {
+    "appTitle": "Moop App",
+    "map": "Mapa del Patio",
+    "bikeList": "Lista de Motos",
+    "registerSlot": "Registro de Plaza",
+    "stats": "Estadísticas",
+    "mecanicos": "Mecánicos",
+    "mecanicoNew": "Nuevo Mecánico",
+    "mecanicoDetails": "Detalles del Mecánico",
+    "oficinas": "Talleres",
+    "oficinaNew": "Nuevo Taller",
+    "oficinaDetails": "Detalles del Taller",
+    "depositos": "Depósitos",
+    "depositoNew": "Nuevo Depósito",
+    "depositoDetails": "Detalles del Depósito",
+    "motos": "Motos",
+    "motoNew": "Nueva Moto",
+    "motoDetails": "Detalles de la Moto",
+    "login": "Iniciar Sesión",
+    "register": "Registro"
+  },
+  "apiStatus": {
+    "checking": "Verificando API...",
+    "online": "API en Línea",
+    "offline": "API Fuera de Línea",
+    "authRequired": "API en Línea (requiere autenticación)",
+    "refresh": "Actualizar"
+  },
+  "moto": {
+    "list": {
+      "title": "Motos",
+      "empty": "No hay motos registradas.\nPulsa el botón + para agregar."
+    },
+    "form": {
+      "titleNew": "Nueva Moto",
+      "titleEdit": "Editar Moto",
+      "marca": "Marca",
+      "modelo": "Modelo",
+      "ano": "Año",
+      "placeholderMarca": "Escribe la marca de la moto",
+      "placeholderModelo": "Escribe el modelo de la moto",
+      "placeholderAno": "Escribe el año de la moto",
+      "errorMarca": "La marca es obligatoria",
+      "errorModelo": "El modelo es obligatorio",
+      "errorAnoRequired": "El año es obligatorio",
+      "errorAnoNumber": "El año debe ser un número válido",
+      "errorAnoRange": "El año debe estar entre 1900 y 2100",
+      "created": "Moto creada con éxito",
+      "updated": "Moto actualizada con éxito",
+      "loading": "Cargando motos..."
+    },
+    "delete": {
+      "title": "Confirmar Eliminación",
+      "message": "¿Deseas eliminar la moto {{marca}} {{modelo}}?",
+      "success": "Moto eliminada con éxito"
+    }
+  }
+  ,
+  "auth": {
+    "common": {
+      "errorEmailRequired": "El correo es obligatorio",
+      "errorEmailInvalid": "Correo inválido",
+      "errorPasswordRequired": "La contraseña es obligatoria",
+      "errorPasswordMin": "La contraseña debe tener al menos 6 caracteres"
+    },
+    "login": {
+      "title": "Iniciar Sesión",
+      "email": "Correo",
+      "password": "Contraseña",
+      "placeholderEmail": "Escribe tu correo",
+      "placeholderPassword": "Escribe tu contraseña",
+      "action": "Iniciar Sesión",
+      "linkRegister": "¿No tienes cuenta? Regístrate",
+      "errorTitle": "Error de Inicio de Sesión",
+      "unexpected": "Ocurrió un error inesperado. Inténtalo de nuevo."
+    },
+    "register": {
+      "title": "Registro",
+      "name": "Nombre",
+      "email": "Correo",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar Contraseña",
+      "placeholderName": "Escribe tu nombre",
+      "placeholderEmail": "Escribe tu correo",
+      "placeholderPassword": "Escribe tu contraseña",
+      "placeholderConfirmPassword": "Confirma tu contraseña",
+      "action": "Registrar",
+      "linkLogin": "¿Ya tienes cuenta? Inicia sesión",
+      "successTitle": "Éxito",
+      "successMessage": "¡Cuenta creada con éxito!",
+      "errorTitle": "Error de Registro",
+      "errorNameRequired": "El nombre es obligatorio",
+      "errorNameMin": "El nombre debe tener al menos 2 caracteres",
+      "errorConfirmRequired": "La confirmación de contraseña es obligatoria",
+      "errorPasswordsMismatch": "Las contraseñas no coinciden"
+    },
+    "logout": {
+      "confirmTitle": "Confirmar Cierre de Sesión",
+      "confirmMessage": "¿Deseas salir de la aplicación?",
+      "cancel": "Cancelar",
+      "action": "Salir",
+      "fallbackTitle": "Salir",
+      "fallbackMessage": "Cerrando la sesión...",
+      "error": "No fue posible cerrar sesión."
+    }
+  },
+  "deposito": {
+    "list": {
+      "loading": "Cargando depósitos...",
+      "empty": "No hay depósitos registrados.\nPulsa el botón + para agregar."
+    },
+    "form": {
+      "titleNew": "Nuevo Depósito",
+      "titleEdit": "Editar Depósito",
+      "nome": "Nombre del Depósito",
+      "endereco": "Dirección",
+      "placeholderNome": "Escribe el nombre del depósito",
+      "placeholderEndereco": "Escribe la dirección completa",
+      "errorNomeRequired": "El nombre es obligatorio",
+      "errorNomeMin": "El nombre debe tener al menos 2 caracteres",
+      "errorEnderecoRequired": "La dirección es obligatoria",
+      "errorEnderecoMin": "La dirección debe tener al menos 5 caracteres",
+      "created": "Depósito creado con éxito",
+      "updated": "Depósito actualizado con éxito"
+    },
+    "delete": {
+      "title": "Confirmar Eliminación",
+      "message": "¿Deseas eliminar el depósito {{nome}}?",
+      "success": "Depósito eliminado con éxito"
+    }
+  }
+  ,
+  "mecanico": {
+    "form": {
+      "titleNew": "Nuevo Mecánico",
+      "titleEdit": "Editar Mecánico",
+      "nome": "Nombre",
+      "especialidade": "Especialidad",
+      "placeholderNome": "Escribe el nombre del mecánico",
+      "placeholderEspecialidade": "Escribe la especialidad del mecánico",
+      "errorNomeRequired": "El nombre es obligatorio",
+      "errorNomeMin": "El nombre debe tener al menos 2 caracteres",
+      "errorEspecialidadeRequired": "La especialidad es obligatoria",
+      "errorEspecialidadeMin": "La especialidad debe tener al menos 2 caracteres",
+      "created": "Mecánico creado con éxito",
+      "updated": "Mecánico actualizado con éxito"
+    },
+    "delete": {
+      "title": "Confirmar Eliminación",
+      "message": "¿Deseas eliminar el mecánico {{nome}}?",
+      "success": "Mecánico eliminado con éxito"
+    }
+  },
+  "oficina": {
+    "form": {
+      "titleNew": "Nuevo Taller",
+      "titleEdit": "Editar Taller",
+      "nome": "Nombre del Taller",
+      "endereco": "Dirección",
+      "telefone": "Teléfono",
+      "especialidades": "Especialidades",
+      "placeholderNome": "Escribe el nombre del taller",
+      "placeholderEndereco": "Escribe la dirección completa",
+      "placeholderTelefone": "(11) 99999-9999",
+      "errorNomeRequired": "El nombre es obligatorio",
+      "errorNomeMin": "El nombre debe tener al menos 2 caracteres",
+      "errorEnderecoRequired": "La dirección es obligatoria",
+      "errorEnderecoMin": "La dirección debe tener al menos 5 caracteres",
+      "errorTelefoneRequired": "El teléfono es obligatorio",
+      "errorTelefoneDigits": "El teléfono debe tener al menos 10 dígitos",
+      "errorEspecialidadesMin": "Selecciona al menos una especialidad",
+      "created": "Taller creado con éxito",
+      "updated": "Taller actualizado con éxito"
+    },
+    "delete": {
+      "title": "Confirmar Eliminación",
+      "message": "¿Deseas eliminar el taller {{nome}}?",
+      "success": "Taller eliminado con éxito"
+    },
+    "especialidadesOptions": [
+      "Motor","Transmisión","Frenos","Suspensión","Eléctrica","Aire Acondicionado","Carrocería","Pintura","Vidrios","Neumáticos"
+    ]
+  },
+  "slot": {
+    "form": {
+      "title": "Registrar Nueva Plaza",
+      "vaga": "Plaza",
+      "modelo": "Modelo de la Moto",
+      "placa": "Placa",
+      "cor": "Color de la Moto",
+      "observacoes": "Observaciones (opcional)",
+      "placeholderVaga": "Escribe la plaza (ej: B2)",
+      "placeholderModelo": "Modelo de la Moto",
+      "placeholderPlaca": "Placa",
+      "placeholderCor": "Color de la Moto",
+      "placeholderObservacoes": "Observaciones (opcional)",
+      "action": "Guardar",
+      "errorVagaRequired": "La plaza es obligatoria",
+      "errorModeloRequired": "El modelo es obligatorio",
+      "errorPlacaRequired": "La placa es obligatoria",
+      "errorCorRequired": "El color es obligatorio",
+      "success": "Moto registrada con éxito!",
+      "errorGeneric": "Error al registrar la moto. Inténtalo de nuevo.",
+      "vagaOcupada": "La plaza {{vaga}} ya está ocupada por la moto \"{{modelo}}\".",
+      "fillAll": "Completa todos los campos obligatorios correctamente."
+    },
+    "modal": {
+      "ok": "OK"
+    }
+  }
+  ,
+  "home": {
+    "welcome": "Bienvenido a Moop",
+    "hello": "Hola, {{name}}!",
+    "map": "Mapa del Patio",
+    "manageOficinas": "Gestionar Talleres",
+    "manageMecanicos": "Gestionar Mecánicos",
+    "manageDepositos": "Gestionar Depósitos",
+    "registerSlot": "Registrar Nueva Plaza",
+    "stats": "Estadísticas"
+  }
+}
