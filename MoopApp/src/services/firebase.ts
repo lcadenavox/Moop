@@ -8,7 +8,9 @@ let getReactNativePersistence: any;
 try {
 	// @ts-ignore
 	({ getReactNativePersistence } = require('firebase/auth/react-native'));
-} catch {}
+} catch {
+  // ignore: web/SSR environment may not have react-native auth persistence
+}
 
 // Resolve config from env, expo.extra, or bundled app.json
 const env: any = (typeof process !== 'undefined' ? process.env : {}) ?? {};
@@ -22,11 +24,13 @@ function resolveExtra(): any {
 	const fromGlobal2 = (globalThis as any)?.ExpoConfig?.extra ?? {};
 	const fromWindow = (typeof window !== 'undefined' && (window as any).__EXPO_CONFIG__?.expoConfig?.extra) || {};
 	let fromAppJson = {} as any;
-	try {
-		// eslint-disable-next-line @typescript-eslint/no-var-requires
-		const appJson = require('../../app.json');
-		fromAppJson = appJson?.expo?.extra ?? {};
-	} catch {}
+		try {
+			// eslint-disable-next-line @typescript-eslint/no-var-requires
+			const appJson = require('../../app.json');
+			fromAppJson = appJson?.expo?.extra ?? {};
+		} catch {
+			// ignore: app.json may not be resolvable in some environments
+		}
 	return { ...fromAppJson, ...fromConstants, ...fromGlobal1, ...fromGlobal2, ...fromWindow };
 }
 
@@ -65,12 +69,12 @@ const app = getApps().length ? getApp() : initializeApp(cfg as any);
 let auth: Auth;
 if (getReactNativePersistence) {
   // React Native: initializeAuth must be called before any getAuth(app)
-  try {
-    auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
-  } catch (e) {
-    // Fallback to default if initializeAuth already called or not supported
-    auth = getAuth(app);
-  }
+	try {
+		auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
+	} catch (e) {
+		// Fallback to default if initializeAuth already called or not supported
+		auth = getAuth(app);
+	}
 } else {
   // Web/other environments
   auth = getAuth(app);

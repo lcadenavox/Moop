@@ -15,6 +15,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Deposito } from '../types';
 import DepositoService from '../services/DepositoService';
 import { ApiError } from '../services/ApiService';
+import { useTranslation } from 'react-i18next';
 
 interface DepositoListScreenProps {
   navigation: any;
@@ -22,6 +23,7 @@ interface DepositoListScreenProps {
 
 const DepositoListScreen: React.FC<DepositoListScreenProps> = ({ navigation }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const [depositos, setDepositos] = useState<Deposito[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -39,9 +41,9 @@ const DepositoListScreen: React.FC<DepositoListScreenProps> = ({ navigation }) =
       setDepositos(data);
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro', error.message);
+        Alert.alert(t('common.error'), error.message);
       } else {
-        Alert.alert('Erro', 'Falha ao carregar depósitos');
+        Alert.alert(t('common.error'), t('deposito.list.errorLoad', 'Falha ao carregar depósitos'));
       }
     } finally {
       setLoading(false);
@@ -56,12 +58,12 @@ const DepositoListScreen: React.FC<DepositoListScreenProps> = ({ navigation }) =
 
   const handleDelete = (deposito: Deposito) => {
     Alert.alert(
-      'Confirmar Exclusão',
-      `Deseja excluir o depósito ${deposito.nome}?`,
+      t('deposito.delete.title'),
+      t('deposito.delete.message', { nome: deposito.nome }),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         { 
-          text: 'Excluir', 
+          text: t('common.delete'), 
           style: 'destructive',
           onPress: () => deleteDeposito(deposito.id)
         },
@@ -73,14 +75,14 @@ const DepositoListScreen: React.FC<DepositoListScreenProps> = ({ navigation }) =
     try {
       await DepositoService.delete(id);
       setDepositos(prev => prev.filter(d => d.id !== id));
-      Alert.alert('Sucesso', 'Depósito excluído com sucesso', [
-        { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) }
+      Alert.alert(t('common.success'), t('deposito.delete.success'), [
+        { text: t('common.ok'), onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) }
       ]);
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro', error.message);
+        Alert.alert(t('common.error'), error.message);
       } else {
-        Alert.alert('Erro', 'Falha ao excluir depósito');
+        Alert.alert(t('common.error'), t('deposito.delete.error', 'Falha ao excluir depósito'));
       }
     }
   };
@@ -201,7 +203,7 @@ const DepositoListScreen: React.FC<DepositoListScreenProps> = ({ navigation }) =
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={[styles.emptyText, { marginTop: theme.spacing.md }]}>
-          Carregando depósitos...
+          {t('deposito.list.loading')}
         </Text>
       </View>
     );
@@ -213,7 +215,7 @@ const DepositoListScreen: React.FC<DepositoListScreenProps> = ({ navigation }) =
         <View style={styles.emptyContainer}>
           <Ionicons name="cube" size={64} color={theme.colors.textSecondary} />
           <Text style={styles.emptyText}>
-            Nenhum depósito cadastrado.{"\n"}Toque no botão + para adicionar.
+            {t('deposito.list.empty')}
           </Text>
         </View>
       ) : (

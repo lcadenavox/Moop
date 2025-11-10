@@ -14,6 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ENV_API_BASE = (process.env as any)?.EXPO_PUBLIC_API_BASE_URL as string | undefined;
 const ENV_API_VERSION = (process.env as any)?.EXPO_PUBLIC_API_VERSION as string | undefined;
+const ENV_API_KEY = (process.env as any)?.EXPO_PUBLIC_API_KEY as string | undefined; // opcional: X-Api-Key
 
 // Padrão seguro: HTTPS no localhost (compatível com Swagger dev cert).
 const DEFAULT_BASE = 'https://localhost:7054/api';
@@ -50,6 +51,9 @@ class ApiService {
       };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+      }
+      if (ENV_API_KEY) {
+        headers['X-Api-Key'] = ENV_API_KEY;
       }
 
       const url = `${API_BASE_URL}${endpoint}`;

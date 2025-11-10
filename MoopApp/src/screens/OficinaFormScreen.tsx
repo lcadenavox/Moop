@@ -14,6 +14,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Oficina } from '../types';
 import OficinaService from '../services/OficinaService';
 import { ApiError } from '../services/ApiService';
+import { useTranslation } from 'react-i18next';
+import { createOficinaSchema, validateWith } from '../validation/schemas';
 
 interface OficinaFormScreenProps {
   navigation: any;
@@ -36,7 +38,9 @@ const especialidadesDisponiveis = [
 const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route }) => {
   const { theme } = useTheme();
   const { oficina } = route.params || {};
+  const { t } = useTranslation();
   const isEditing = !!oficina;
+  const translatedEspecialidades = (t('oficina.especialidadesOptions', { returnObjects: true }) as string[]) || especialidadesDisponiveis;
 
   const [nome, setNome] = useState(oficina?.nome || '');
   const [endereco, setEndereco] = useState(oficina?.endereco || '');
@@ -53,9 +57,9 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
 
   useEffect(() => {
     navigation.setOptions({
-      title: isEditing ? 'Editar Oficina' : 'Nova Oficina',
+      title: isEditing ? t('oficina.form.titleEdit') : t('oficina.form.titleNew'),
     });
-  }, [navigation, isEditing]);
+  }, [navigation, isEditing, t]);
 
   const toggleEspecialidade = (especialidade: string) => {
     setEspecialidadesSelecionadas(prev => {
@@ -68,54 +72,25 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
     if (especialidadesError) setEspecialidadesError('');
   };
 
-  const validateForm = (): boolean => {
-    let isValid = true;
-
-    // Reset errors
+  const handleSave = async () => {
     setNomeError('');
     setEnderecoError('');
     setTelefoneError('');
     setEspecialidadesError('');
-
-    // Nome validation
-    if (!nome.trim()) {
-      setNomeError('Nome é obrigatório');
-      isValid = false;
-    } else if (nome.trim().length < 2) {
-      setNomeError('Nome deve ter pelo menos 2 caracteres');
-      isValid = false;
+    const schema = createOficinaSchema(t);
+    const result = await validateWith(schema, {
+      nome,
+      endereco,
+      telefone,
+      especialidades: especialidadesSelecionadas,
+    });
+    if (!result.valid) {
+      setNomeError(result.errors.nome || '');
+      setEnderecoError(result.errors.endereco || '');
+      setTelefoneError(result.errors.telefone || '');
+      setEspecialidadesError(result.errors.especialidades || '');
+      return;
     }
-
-    // Endereço validation
-    if (!endereco.trim()) {
-      setEnderecoError('Endereço é obrigatório');
-      isValid = false;
-    } else if (endereco.trim().length < 5) {
-      setEnderecoError('Endereço deve ter pelo menos 5 caracteres');
-      isValid = false;
-    }
-
-    // Telefone validation
-    const telefoneClean = telefone.replace(/\D/g, '');
-    if (!telefone.trim()) {
-      setTelefoneError('Telefone é obrigatório');
-      isValid = false;
-    } else if (telefoneClean.length < 10) {
-      setTelefoneError('Telefone deve ter pelo menos 10 dígitos');
-      isValid = false;
-    }
-
-    // Especialidades validation
-    if (especialidadesSelecionadas.length === 0) {
-      setEspecialidadesError('Selecione pelo menos uma especialidade');
-      isValid = false;
-    }
-
-    return isValid;
-  };
-
-  const handleSave = async () => {
-    if (!validateForm()) return;
 
     try {
       setLoading(true);
@@ -129,20 +104,20 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
 
       if (isEditing) {
         await OficinaService.update(oficina.id, oficinaData);
-        Alert.alert('Sucesso', 'Oficina atualizada com sucesso', [
-          { text: 'OK', onPress: () => navigation.navigate('OficinaList') }
+        Alert.alert(t('common.success'), t('oficina.form.updated'), [
+          { text: t('common.ok'), onPress: () => navigation.navigate('OficinaList') }
         ]);
       } else {
         await OficinaService.create(oficinaData);
-        Alert.alert('Sucesso', 'Oficina criada com sucesso', [
-          { text: 'OK', onPress: () => navigation.navigate('OficinaList') }
+        Alert.alert(t('common.success'), t('oficina.form.created'), [
+          { text: t('common.ok'), onPress: () => navigation.navigate('OficinaList') }
         ]);
       }
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro', error.message);
+        Alert.alert(t('common.error'), error.message);
       } else {
-        Alert.alert('Erro', 'Falha ao salvar oficina');
+        Alert.alert(t('common.error'), t('oficina.form.errorSave', 'Falha ao salvar oficina'));
       }
     } finally {
       setLoading(false);
@@ -248,7 +223,7 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Nome da Oficina</Text>
+          <Text style={styles.label}>{t('oficina.form.nome')}</Text>
           <TextInput
             style={[styles.input, nomeError ? styles.inputError : null]}
             value={nome}
@@ -256,7 +231,7 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
               setNome(text);
               if (nomeError) setNomeError('');
             }}
-            placeholder="Digite o nome da oficina"
+            placeholder={t('oficina.form.placeholderNome')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
           />
@@ -264,7 +239,7 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Endereço</Text>
+          <Text style={styles.label}>{t('oficina.form.endereco')}</Text>
           <TextInput
             style={[styles.input, enderecoError ? styles.inputError : null]}
             value={endereco}
@@ -272,7 +247,7 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
               setEndereco(text);
               if (enderecoError) setEnderecoError('');
             }}
-            placeholder="Digite o endereço completo"
+            placeholder={t('oficina.form.placeholderEndereco')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
             multiline
@@ -281,7 +256,7 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Telefone</Text>
+          <Text style={styles.label}>{t('oficina.form.telefone')}</Text>
           <TextInput
             style={[styles.input, telefoneError ? styles.inputError : null]}
             value={telefone}
@@ -289,7 +264,7 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
               setTelefone(text);
               if (telefoneError) setTelefoneError('');
             }}
-            placeholder="(11) 99999-9999"
+            placeholder={t('oficina.form.placeholderTelefone')}
             placeholderTextColor={theme.colors.textSecondary}
             keyboardType="phone-pad"
           />
@@ -297,9 +272,9 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Especialidades</Text>
+          <Text style={styles.label}>{t('oficina.form.especialidades')}</Text>
           <View style={styles.especialidadesContainer}>
-            {especialidadesDisponiveis.map((especialidade) => {
+            {translatedEspecialidades.map((especialidade) => {
               const isSelected = especialidadesSelecionadas.includes(especialidade);
               return (
                 <TouchableOpacity
@@ -330,7 +305,7 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
             style={[styles.button, styles.secondaryButton]}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.secondaryButtonText}>Cancelar</Text>
+            <Text style={styles.secondaryButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -346,7 +321,7 @@ const OficinaFormScreen: React.FC<OficinaFormScreenProps> = ({ navigation, route
               <ActivityIndicator color="white" />
             ) : (
               <Text style={styles.primaryButtonText}>
-                {isEditing ? 'Atualizar' : 'Salvar'}
+                {isEditing ? t('common.update') : t('common.save')}
               </Text>
             )}
           </TouchableOpacity>

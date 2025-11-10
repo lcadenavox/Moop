@@ -13,6 +13,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ApiError } from '../services/ApiService';
 import ApiStatus from '../components/ApiStatus';
+import { useTranslation } from 'react-i18next';
+import { createRegisterSchema, validateWith } from '../validation/schemas';
 
 interface RegisterScreenProps {
   navigation: any;
@@ -20,6 +22,7 @@ interface RegisterScreenProps {
 
 const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { register, isLoading } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -30,67 +33,38 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
 
-  const validateForm = (): boolean => {
-    let isValid = true;
-
+  const handleRegister = async () => {
     // Reset errors
     setNameError('');
     setEmailError('');
     setPasswordError('');
     setConfirmPasswordError('');
 
-    // Name validation
-    if (!name.trim()) {
-      setNameError('Nome é obrigatório');
-      isValid = false;
-    } else if (name.trim().length < 2) {
-      setNameError('Nome deve ter pelo menos 2 caracteres');
-      isValid = false;
+    const schema = createRegisterSchema(t);
+    const result = await validateWith(schema, {
+      name,
+      email,
+      password,
+      confirmPassword,
+    });
+    if (!result.valid) {
+      setNameError(result.errors.name || '');
+      setEmailError(result.errors.email || '');
+      setPasswordError(result.errors.password || '');
+      setConfirmPasswordError(result.errors.confirmPassword || '');
+      return;
     }
-
-    // Email validation
-    if (!email.trim()) {
-      setEmailError('Email é obrigatório');
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError('Email inválido');
-      isValid = false;
-    }
-
-    // Password validation
-    if (!password.trim()) {
-      setPasswordError('Senha é obrigatória');
-      isValid = false;
-    } else if (password.length < 6) {
-      setPasswordError('Senha deve ter pelo menos 6 caracteres');
-      isValid = false;
-    }
-
-    // Confirm password validation
-    if (!confirmPassword.trim()) {
-      setConfirmPasswordError('Confirmação de senha é obrigatória');
-      isValid = false;
-    } else if (password !== confirmPassword) {
-      setConfirmPasswordError('Senhas não coincidem');
-      isValid = false;
-    }
-
-    return isValid;
-  };
-
-  const handleRegister = async () => {
-    if (!validateForm()) return;
 
     try {
       await register(name.trim(), email.trim(), password);
-      Alert.alert('Sucesso', 'Conta criada com sucesso!', [
-        { text: 'OK', onPress: () => navigation.replace('Home') }
+      Alert.alert(t('auth.register.successTitle'), t('auth.register.successMessage'), [
+        { text: t('common.ok'), onPress: () => navigation.replace('Home') }
       ]);
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro de Cadastro', error.message);
+        Alert.alert(t('auth.register.errorTitle'), error.message);
       } else {
-        Alert.alert('Erro', 'Ocorreu um erro inesperado. Tente novamente.');
+        Alert.alert(t('common.error'), t('auth.login.unexpected'));
       }
     }
   };
@@ -168,10 +142,10 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
     <View style={styles.container}>
       <ApiStatus />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Cadastrar</Text>
+  <Text style={styles.title}>{t('auth.register.title')}</Text>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Nome</Text>
+          <Text style={styles.label}>{t('auth.register.name')}</Text>
           <TextInput
             style={[styles.input, nameError ? styles.inputError : null]}
             value={name}
@@ -179,7 +153,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               setName(text);
               if (nameError) setNameError('');
             }}
-            placeholder="Digite seu nome"
+            placeholder={t('auth.register.placeholderName')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
           />
@@ -187,7 +161,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t('auth.register.email')}</Text>
           <TextInput
             style={[styles.input, emailError ? styles.inputError : null]}
             value={email}
@@ -195,7 +169,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               setEmail(text);
               if (emailError) setEmailError('');
             }}
-            placeholder="Digite seu email"
+            placeholder={t('auth.register.placeholderEmail')}
             placeholderTextColor={theme.colors.textSecondary}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -205,7 +179,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Senha</Text>
+          <Text style={styles.label}>{t('auth.register.password')}</Text>
           <TextInput
             style={[styles.input, passwordError ? styles.inputError : null]}
             value={password}
@@ -213,7 +187,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               setPassword(text);
               if (passwordError) setPasswordError('');
             }}
-            placeholder="Digite sua senha"
+            placeholder={t('auth.register.placeholderPassword')}
             placeholderTextColor={theme.colors.textSecondary}
             secureTextEntry
             autoCapitalize="none"
@@ -222,7 +196,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Confirmar Senha</Text>
+          <Text style={styles.label}>{t('auth.register.confirmPassword')}</Text>
           <TextInput
             style={[styles.input, confirmPasswordError ? styles.inputError : null]}
             value={confirmPassword}
@@ -230,7 +204,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               setConfirmPassword(text);
               if (confirmPasswordError) setConfirmPasswordError('');
             }}
-            placeholder="Confirme sua senha"
+            placeholder={t('auth.register.placeholderConfirmPassword')}
             placeholderTextColor={theme.colors.textSecondary}
             secureTextEntry
             autoCapitalize="none"
@@ -246,7 +220,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
           {isLoading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text style={styles.buttonText}>Cadastrar</Text>
+            <Text style={styles.buttonText}>{t('auth.register.action')}</Text>
           )}
         </TouchableOpacity>
 
@@ -254,7 +228,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
           style={styles.linkButton}
           onPress={() => navigation.navigate('Login')}
         >
-          <Text style={styles.linkText}>Já tem conta? Faça login</Text>
+          <Text style={styles.linkText}>{t('auth.register.linkLogin')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

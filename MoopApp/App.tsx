@@ -6,6 +6,13 @@ import { StatusBar } from 'expo-status-bar';
 
 import { ThemeProvider, useTheme } from "./src/contexts/ThemeContext";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
+import { initI18n } from './src/i18n';
+import LanguageSwitcher from './src/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
+import { registerForPushNotifications } from './src/services/NotificationsService';
+import * as Device from 'expo-device';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Existing screens
 import BikeListScreen from "./src/screens/BikeListScreen";
@@ -35,6 +42,7 @@ const Stack = createNativeStackNavigator();
 function AppNavigator() {
   const { theme, isDark } = useTheme();
   const { isAuthenticated, isLoading } = useAuth();
+  const { t } = useTranslation();
 
   const screenOptions = {
     headerStyle: {
@@ -47,6 +55,9 @@ function AppNavigator() {
     contentStyle: {
       backgroundColor: theme.colors.background,
     },
+    headerRight: () => (
+      <LanguageSwitcher />
+    ),
   };
 
   if (isLoading) {
@@ -72,91 +83,95 @@ function AppNavigator() {
               <Stack.Screen 
                 name="Home" 
                 component={HomeScreen} 
-                options={{ title: 'Moop App' }}
+                options={{ title: t('nav.appTitle') }}
               />
               <Stack.Screen 
-                name="Mapa do Pátio" 
+                name="MapScreen" 
                 component={MapScreen} 
+                options={{ title: t('nav.map') }}
               />
               <Stack.Screen 
-                name="Lista de Motos" 
+                name="BikeListScreen" 
                 component={BikeListScreen} 
+                options={{ title: t('nav.bikeList') }}
               />
               <Stack.Screen 
-                name="Cadastro de Vaga" 
+                name="RegisterSlotScreen" 
                 component={RegisterSlotScreen} 
+                options={{ title: t('nav.registerSlot') }}
               />
               <Stack.Screen 
-                name="Estatísticas" 
+                name="StatisticsScreen" 
                 component={StatisticsScreen} 
+                options={{ title: t('nav.stats') }}
               />
               
               {/* New Mecanico CRUD screens */}
               <Stack.Screen 
                 name="MecanicoList" 
                 component={MecanicoListScreen}
-                options={{ title: 'Mecânicos' }}
+                options={{ title: t('nav.mecanicos') }}
               />
               <Stack.Screen 
                 name="MecanicoForm" 
                 component={MecanicoFormScreen}
-                options={{ title: 'Novo Mecânico' }}
+                options={{ title: t('nav.mecanicoNew') }}
               />
               <Stack.Screen 
                 name="MecanicoDetail" 
                 component={MecanicoDetailScreen}
-                options={{ title: 'Detalhes do Mecânico' }}
+                options={{ title: t('nav.mecanicoDetails') }}
               />
               
               {/* New Oficina CRUD screens */}
               <Stack.Screen 
                 name="OficinaList" 
                 component={OficinaListScreen}
-                options={{ title: 'Oficinas' }}
+                options={{ title: t('nav.oficinas') }}
               />
               <Stack.Screen 
                 name="OficinaForm" 
                 component={OficinaFormScreen}
-                options={{ title: 'Nova Oficina' }}
+                options={{ title: t('nav.oficinaNew') }}
               />
               <Stack.Screen 
                 name="OficinaDetail" 
                 component={OficinaDetailScreen}
-                options={{ title: 'Detalhes da Oficina' }}
+                options={{ title: t('nav.oficinaDetails') }}
               />
 
               {/* New Deposito CRUD screens */}
               <Stack.Screen 
                 name="DepositoList" 
                 component={DepositoListScreen}
-                options={{ title: 'Depósitos' }}
+                options={{ title: t('nav.depositos') }}
               />
               <Stack.Screen 
                 name="DepositoForm" 
                 component={DepositoFormScreen}
-                options={{ title: 'Novo Depósito' }}
+                options={{ title: t('nav.depositoNew') }}
               />
               <Stack.Screen 
                 name="DepositoDetail" 
                 component={DepositoDetailScreen}
-                options={{ title: 'Detalhes do Depósito' }}
+                options={{ title: t('nav.depositoDetails') }}
               />
 
               {/* New Moto CRUD screens */}
               <Stack.Screen 
                 name="MotoList" 
                 component={MotoListScreen}
-                options={{ title: 'Motos' }}
+                options={{ title: t('moto.list.title') }}
               />
               <Stack.Screen 
                 name="MotoForm" 
                 component={MotoFormScreen}
-                options={{ title: 'Nova Moto' }}
+                options={{ title: t('moto.form.titleNew') }}
               />
               <Stack.Screen 
                 name="MotoDetail" 
                 component={MotoDetailScreen}
-                options={{ title: 'Detalhes da Moto' }}
+                options={{ title: t('nav.motoDetails') }}
               />
             </>
           ) : (
@@ -181,6 +196,44 @@ function AppNavigator() {
 }
 
 export default function App() {
+  // Initialize i18n once
+  initI18n();
+
+  React.useEffect(() => {
+    // Load persisted language if exists
+    (async () => {
+      try {
+        const saved = await AsyncStorage.getItem('lang');
+        if (saved) {
+          const { default: i18n } = await import('./src/i18n');
+          i18n.changeLanguage(saved);
+        }
+      } catch {
+        // ignore language load error
+      }
+    })();
+
+    // Register push notifications and log token (later send to backend)
+    // Registra push somente em dispositivo físico; evita warnings no web
+    if (Device.isDevice) {
+      registerForPushNotifications().then((res) => {
+        if (res.granted && res.token) {
+          console.log('Expo push token:', res.token);
+        } else if (res.error) {
+          console.log('Push registration info:', res.error);
+        }
+      });
+    } else {
+      console.log('Push remoto indisponível em web/simulador - usando fallback local (Alert).');
+    }
+    const sub = Notifications.addNotificationReceivedListener((notification) => {
+      console.log('Notification received:', notification.request.content);
+    });
+    return () => {
+      sub.remove();
+    };
+  }, []);
+
   return (
     <ThemeProvider>
       <AuthProvider>

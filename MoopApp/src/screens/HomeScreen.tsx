@@ -4,20 +4,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import ApiStatus from '../components/ApiStatus';
+import { useTranslation } from 'react-i18next';
 
 export default function HomeScreen({ navigation }: any) {
   const { theme, isDark, toggleTheme } = useTheme();
   const { logout, user, isLoading } = useAuth();
+  const { t } = useTranslation();
 
   const handleLogout = () => {
     try {
       Alert.alert(
-        'Confirmar Logout',
-        'Deseja realmente sair do aplicativo?',
+        t('auth.logout.confirmTitle'),
+        t('auth.logout.confirmMessage'),
         [
-          { text: 'Cancelar', style: 'cancel' },
+          { text: t('auth.logout.cancel'), style: 'cancel' },
           {
-            text: 'Sair',
+            text: t('auth.logout.action'),
             style: 'destructive',
             onPress: async () => {
               try {
@@ -25,7 +27,7 @@ export default function HomeScreen({ navigation }: any) {
                 navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
               } catch (error) {
                 console.error('Logout error:', error);
-                Alert.alert('Erro', 'Não foi possível realizar logout.');
+                Alert.alert(t('common.error'), t('auth.logout.error'));
               }
             }
           },
@@ -33,9 +35,9 @@ export default function HomeScreen({ navigation }: any) {
       );
     } catch (e) {
       // Fallback raríssimo caso Alert falhe no ambiente
-      Alert.alert('Sair', 'Encerrando a sessão...', [
+      Alert.alert(t('auth.logout.fallbackTitle'), t('auth.logout.fallbackMessage'), [
         {
-          text: 'OK',
+          text: t('common.ok'),
           onPress: async () => {
             await logout();
             navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
@@ -130,9 +132,9 @@ export default function HomeScreen({ navigation }: any) {
       </View>
 
       <View style={styles.welcomeContainer}>
-        <Text style={styles.title}>Bem-vindo à Moop</Text>
+        <Text style={styles.title}>{t('home.welcome')}</Text>
         {user && (
-          <Text style={styles.subtitle}>Olá, {user.name || user.email}!</Text>
+          <Text style={styles.subtitle}>{t('home.hello', { name: (user.name || user.email) })}</Text>
         )}
       </View>
 
@@ -141,7 +143,7 @@ export default function HomeScreen({ navigation }: any) {
         onPress={() => navigation.navigate("Mapa do Pátio")}
       >
         <Ionicons name="map" size={20} color={theme.colors.text} />
-        <Text style={styles.textoBotao}>Mapa do Pátio</Text>
+        <Text style={styles.textoBotao}>{t('home.map')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -149,7 +151,7 @@ export default function HomeScreen({ navigation }: any) {
         onPress={() => navigation.navigate("MotoList")}
       >
         <Ionicons name="list" size={20} color={theme.colors.text} />
-        <Text style={styles.textoBotao}>Lista de Motos</Text>
+        <Text style={styles.textoBotao}>{t('nav.bikeList')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -157,7 +159,7 @@ export default function HomeScreen({ navigation }: any) {
         onPress={() => navigation.navigate("OficinaList")}
       >
         <Ionicons name="business" size={20} color={theme.colors.text} />
-        <Text style={styles.textoBotao}>Gerenciar Oficinas</Text>
+        <Text style={styles.textoBotao}>{t('home.manageOficinas')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -165,7 +167,7 @@ export default function HomeScreen({ navigation }: any) {
         onPress={() => navigation.navigate("MecanicoList")}
       >
         <Ionicons name="construct" size={20} color={theme.colors.text} />
-        <Text style={styles.textoBotao}>Gerenciar Mecânicos</Text>
+        <Text style={styles.textoBotao}>{t('home.manageMecanicos')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -173,7 +175,7 @@ export default function HomeScreen({ navigation }: any) {
         onPress={() => navigation.navigate("DepositoList")}
       >
         <Ionicons name="cube" size={20} color={theme.colors.text} />
-        <Text style={styles.textoBotao}>Gerenciar Depósitos</Text>
+        <Text style={styles.textoBotao}>{t('home.manageDepositos')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -181,7 +183,7 @@ export default function HomeScreen({ navigation }: any) {
         onPress={() => navigation.navigate("Cadastro de Vaga")}
       >
         <Ionicons name="add-circle" size={20} color={theme.colors.text} />
-        <Text style={styles.textoBotao}>Cadastrar Nova Vaga</Text>
+        <Text style={styles.textoBotao}>{t('home.registerSlot')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -189,7 +191,7 @@ export default function HomeScreen({ navigation }: any) {
         onPress={() => navigation.navigate("Estatísticas")}
       >
         <Ionicons name="stats-chart" size={20} color={theme.colors.text} />
-        <Text style={styles.textoBotao}>Estatísticas</Text>
+        <Text style={styles.textoBotao}>{t('home.stats')}</Text>
       </TouchableOpacity>
     </View>
   );

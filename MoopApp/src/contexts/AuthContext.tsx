@@ -48,32 +48,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (email: string, password: string): Promise<void> => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const response = await AuthService.login(email, password);
-      
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
-      
       setUser(response.user);
-    } catch (error) {
-      throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
   const register = async (name: string, email: string, password: string): Promise<void> => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const response = await AuthService.register({ name, email, password });
-      
       await AsyncStorage.setItem('token', response.token);
       await AsyncStorage.setItem('user', JSON.stringify(response.user));
-      
       setUser(response.user);
-    } catch (error) {
-      throw error;
     } finally {
       setIsLoading(false);
     }

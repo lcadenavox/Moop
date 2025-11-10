@@ -8,7 +8,7 @@
 
 ## Descrição
 
-O Moop é um aplicativo desenvolvido em React Native com Expo que permite a gestão de oficinas, mecânicos, depósitos e motos. O aplicativo inclui sistema de autenticação (login/cadastro/logout), temas claro/escuro e funcionalidades CRUD completas integradas a uma API .NET.
+O Moop é um aplicativo desenvolvido em React Native com Expo que permite a gestão de oficinas, mecânicos, depósitos e motos. O aplicativo inclui sistema de autenticação (login/cadastro/logout), temas claro/escuro, internacionalização (PT/ES) e funcionalidades CRUD completas integradas a uma API .NET.
 
 ## Funcionalidades Principais
 
@@ -45,10 +45,16 @@ O Moop é um aplicativo desenvolvido em React Native com Expo que permite a gest
 - **Toggle automático** com persistência de preferências
 - Cores, tipografia e espaçamentos consistentes
 
+### Internacionalização (i18n)
+- Suporte a Português (pt-BR) e Espanhol (es)
+- Persistência da linguagem selecionada via AsyncStorage
+- Mudança dinâmica sem reiniciar o app
+- Arquivos de tradução centralizados (`src/i18n/locales/pt.json`, `es.json`)
+
 ### Outras Telas
 - **Lista de motos** (integrada à API)
 - **Mapa do pátio** mostrando vagas ocupadas e livres (local)
-- **Cadastro de vagas** no pátio (local)
+- **Cadastro de vagas** no pátio (local) com validação e feedback
 - **Tela de estatísticas** (local + API)
 
 ## Arquitetura Técnica
@@ -89,9 +95,11 @@ src/
 - **React Native** com Expo 53
 - **TypeScript**
 - **React Navigation**
-- **AsyncStorage** (sessão/tema)
+- **AsyncStorage** (sessão/tema/idioma)
 - **Expo Vector Icons**
 - **API .NET** para backend (https://localhost:7054/swagger)
+- **i18next + react-i18next + expo-localization** (internacionalização)
+- **Yup** (validação de formulários reutilizável)
 
 ## Instruções de Instalação
 
@@ -112,6 +120,9 @@ src/
    ```bash
    npm install
    ```
+   Dependências principais adicionais utilizadas:
+   - i18n: `i18next react-i18next expo-localization`
+   - Validação: `yup`
 
 3. **Configure a API**
    - Certifique-se de que a API .NET esteja rodando em `https://localhost:7054`
@@ -215,6 +226,85 @@ public class Mecanico
 - Código limpo e tipado (TypeScript)
 - Boas práticas RN aplicadas
 
+### ✅ Internacionalização (10 pontos)
+- Todos os textos de interface extraídos para arquivos de tradução
+- Alternância manual via componente `LanguageSwitcher`
+- Persistência da escolha do idioma entre sessões
+- Mensagens de validação e alertas traduzidos
+
+### ✅ Validação de Formulários (incluído nos pontos de UX/Arquitetura)
+- Uso de schemas Yup centralizados em `src/validation/schemas.ts`
+- Regras consistentes para Login, Cadastro, Depósito, Mecânico, Oficina e Cadastro de Vaga
+- Exibição de erros inline e mensagens de feedback traduzidas
+
+## Exemplos de i18n
+
+Inicialização (já configurada em `App.tsx`):
+```ts
+import '../src/i18n'; // garante init antes de usar t()
+```
+
+Uso em um componente:
+```tsx
+import { useTranslation } from 'react-i18next';
+
+const Example = () => {
+   const { t } = useTranslation();
+   return <Text>{t('moto.form.titleNew')}</Text>;
+};
+```
+
+Troca manual de idioma (`LanguageSwitcher.tsx`):
+```tsx
+i18n.changeLanguage(lang); // lang pode ser 'pt' ou 'es'
+```
+
+Estrutura das traduções:
+```
+src/i18n/locales/
+   ├── pt.json
+   └── es.json
+```
+
+## Exemplos de Validação (Yup)
+
+Schemas centralizados (`src/validation/schemas.ts`):
+```ts
+export const createLoginSchema = (t: TFunction) =>
+   Yup.object({
+      email: Yup.string().trim().required(t('auth.common.errorEmailRequired')).email(t('auth.common.errorEmailInvalid')),
+      password: Yup.string().trim().required(t('auth.common.errorPasswordRequired')).min(6, t('auth.common.errorPasswordMin')),
+   });
+```
+
+Uso em um Formulário (exemplo adaptado do Login):
+```ts
+const schema = createLoginSchema(t);
+const result = await validateWith(schema, { email, password });
+if (!result.valid) {
+   setEmailError(result.errors.email || '');
+   setPasswordError(result.errors.password || '');
+   return;
+}
+```
+
+Helper genérico:
+```ts
+export async function validateWith(schema, values) {
+   try {
+      await schema.validate(values, { abortEarly: false, stripUnknown: true });
+      return { valid: true, errors: {} };
+   } catch (err) {
+      // mapeia erros de campo
+   }
+}
+```
+
+Benefícios:
+- Reutilização e consistência das regras
+- Mensagens traduzidas conforme idioma atual
+- Fácil expansão para novos formulários
+
 ## Como Testar
 
 ### 🔧 Configuração da BASE da API
@@ -278,14 +368,108 @@ npm start
 3. A preferência é salva automaticamente
 
 ### Indicador de Status da API
-- Verde "API Online": API respondendo
-- Amarelo "API Offline": API indisponível
-- Use o botão de refresh para verificar novamente
+O componente de status tenta primeiro `GET /health` e depois um endpoint leve (`/Deposito?page=1&pageSize=1`).
+
+Estados:
+- Verde "API Online": API respondendo sem necessidade de autenticação adicional.
+- Laranja "API Online (requer autenticação)": API alcançável, mas o endpoint usado exige token (resposta 401/403).
+- Offline (não exibido): se a API estiver realmente indisponível, o banner não aparece para evitar ruído visual.
+
+Use o botão de refresh para forçar nova verificação.
+
+#### Configurando versão e base da API
+O app aceita duas variáveis de ambiente públicas (Expo) para resolver diferenças entre `/api` e `/api/v1`:
+
+| Variável | Exemplo | Observação |
+|----------|---------|------------|
+| `EXPO_PUBLIC_API_BASE_URL` | `https://localhost:7054/api` | Base SEM a versão (ou já com versão) |
+| `EXPO_PUBLIC_API_VERSION`  | `v1` | Versão da API (não incluir barras). Será concatenada se não estiver presente na base |
+
+Se você já definir a base com a versão (`https://localhost:7054/api/v1`) não precisa setar `EXPO_PUBLIC_API_VERSION`.
+
+PowerShell exemplos:
+```powershell
+# Base + versão separadas
+$env:EXPO_PUBLIC_API_BASE_URL = "https://localhost:7054/api"
+$env:EXPO_PUBLIC_API_VERSION = "v1"
+npm run web
+
+# Base já inclui versão
+$env:EXPO_PUBLIC_API_BASE_URL = "https://localhost:7054/api/v1"
+Remove-Item Env:EXPO_PUBLIC_API_VERSION -ErrorAction SilentlyContinue
+npm run web
+```
+
+#### Endpoint de Health (Backend .NET)
+Adicionar um endpoint simples melhora a detecção sem exigir autenticação:
+```csharp
+// Program.cs
+app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok" }));
+```
+
+#### Habilitando CORS para o Front-end Expo
+```csharp
+builder.Services.AddCors(options =>
+{
+   options.AddPolicy("MoopWeb", policy =>
+   {
+      policy
+         .WithOrigins(
+            "http://localhost:8081",       // Metro web
+            "http://localhost:19006",       // Expo web clássico
+            "https://localhost:8081",
+            "https://localhost:19006"
+         )
+         .WithMethods("GET","POST","PUT","DELETE","OPTIONS")
+         .WithHeaders("Content-Type","Authorization")
+         .AllowCredentials();
+   });
+});
+
+var app = builder.Build();
+app.UseHttpsRedirection();
+app.UseCors("MoopWeb");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.MapGet("/api/v1/health", () => Results.Ok(new { status = "ok" }));
+app.Run();
+```
+
+#### Confiando o Certificado de Desenvolvimento
+```powershell
+dotnet dev-certs https --trust
+```
+Se o navegador ainda bloquear:
+```powershell
+dotnet dev-certs https --clean
+dotnet dev-certs https --trust
+```
+
+#### Debug rápido
+```powershell
+curl -k https://localhost:7054/api/v1/health
+curl -k "https://localhost:7054/api/v1/Deposito?page=1&pageSize=1"
+```
+200 = ok; 401/403 = ok (auth necessária); falha de conexão = backend realmente indisponível.
+### Troca de Idioma
+1. Abra o app e localize o componente de troca de idioma no topo (se integrado ao header) ou na home.
+2. Altere entre Português e Espanhol.
+3. Verifique que os textos das telas e mensagens de validação são atualizados instantaneamente.
+4. Reinicie o app: o idioma escolhido deve persistir.
+
+### Validações
+1. Abra cada formulário (Login, Cadastro, Depósito, Mecânico, Oficina, Vaga).
+2. Tente enviar vazio ou com dados inválidos.
+3. Observe mensagens de erro localizadas.
+4. Corrija os campos e envie novamente; deve aparecer alerta de sucesso traduzido.
+
+
 
 ## Observações Importantes
 
 - Certifique-se de que a API .NET esteja rodando antes de testar as funcionalidades
-- As validações seguem as mesmas regras dos models da API
+- As validações seguem as mesmas regras dos models da API e são centralizadas via Yup
 - O AsyncStorage é usado para sessão e preferências (tema)
 - Todas as operações de rede possuem tratamento de erro e indicadores de carregamento
 

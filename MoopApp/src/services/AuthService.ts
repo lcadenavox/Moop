@@ -57,7 +57,9 @@ const AuthService = {
       if (!auth) throw new Error('Firebase não inicializado');
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       if (name) {
-        try { await updateProfile(cred.user, { displayName: name }); } catch {}
+        try { await updateProfile(cred.user, { displayName: name }); } catch {
+          // non-critical: profile displayName update can fail without blocking auth
+        }
       }
       const token = await cred.user.getIdToken();
       return { token, user: { id: cred.user.uid as any, name: name || email.split('@')[0], email: cred.user.email ?? email } };

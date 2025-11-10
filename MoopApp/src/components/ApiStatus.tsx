@@ -92,10 +92,15 @@ const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
     
   });
 
+  // Se offline mostramos nada para não poluir UI. Só mostra se online ou verificando
+  if (!isChecking && !isOnline) {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <Ionicons
-        name={isChecking ? 'sync' : isOnline ? 'checkmark-circle' : 'warning'}
+        name={isChecking ? 'sync' : authIssue ? 'lock-closed' : 'checkmark-circle'}
         size={16}
         color="white"
         style={styles.icon}
@@ -103,12 +108,9 @@ const ApiStatus: React.FC<ApiStatusProps> = ({ onToggleMode }) => {
       <Text style={styles.text}>
         {isChecking
           ? t('apiStatus.checking')
-          : isOnline
-          ? authIssue
-            ? t('apiStatus.authRequired')
-            : t('apiStatus.online')
-          : t('apiStatus.offline')}
-        {lastError && !isChecking && !authIssue ? ` (${lastError})` : ''}
+          : authIssue
+          ? t('apiStatus.authRequired')
+          : t('apiStatus.online')}
       </Text>
       <TouchableOpacity style={styles.button} onPress={checkApiStatus}>
         <Ionicons name="refresh" size={16} color="white" />

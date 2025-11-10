@@ -9,8 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from 'react-i18next';
+import { createRegisterSlotSchema, validateWith } from '../validation/schemas';
 
 export default function RegisterSlotScreen() {
+  const { t } = useTranslation();
   const [vaga, setVaga] = useState("");
   const [modelo, setModelo] = useState("");
   const [placa, setPlaca] = useState("");
@@ -22,53 +25,41 @@ export default function RegisterSlotScreen() {
   const [textoModal, setTextoModal] = useState("");
 
   const salvarVaga = async () => {
-    const vagaFormatada = vaga.toUpperCase().trim();
-    const modeloFormatado = modelo.trim();
-    const placaFormatada = placa.trim();
-    const corFormatada = cor.trim();
-
-    if (
-      !vagaFormatada ||
-      !modeloFormatado ||
-      !placaFormatada ||
-      !corFormatada
-    ) {
-      exibirModal("Preencha todos os campos obrigatórios corretamente.");
+    const schema = createRegisterSlotSchema(t);
+    const result = await validateWith(schema, { vaga, modelo, placa, cor, observacoes });
+    if (!result.valid) {
+      exibirModal(t('slot.form.fillAll'));
       return;
     }
 
-    const dados = await AsyncStorage.getItem("motos");
+    const vagaFormatada = vaga.toUpperCase().trim();
+    const dados = await AsyncStorage.getItem('motos');
     const motos = dados ? JSON.parse(dados) : [];
-
-    const ocupada = motos.find(
-      (moto: { vaga: string }) => moto.vaga === vagaFormatada
-    );
+    const ocupada = motos.find((moto: { vaga: string; modelo: string }) => moto.vaga === vagaFormatada);
     if (ocupada) {
-      exibirModal(
-        `A vaga ${vagaFormatada} já está ocupada pela moto "${ocupada.modelo}".`
-      );
+      exibirModal(t('slot.form.vagaOcupada', { vaga: vagaFormatada, modelo: ocupada.modelo }));
       return;
     }
 
     const novaMoto = {
       vaga: vagaFormatada,
-      modelo: modeloFormatado,
-      placa: placaFormatada,
-      cor: corFormatada,
-      observacoes,
+      modelo: modelo.trim(),
+      placa: placa.trim(),
+      cor: cor.trim(),
+      observacoes: observacoes.trim(),
     };
 
     try {
       const novasMotos = [...motos, novaMoto];
-      await AsyncStorage.setItem("motos", JSON.stringify(novasMotos));
-      exibirModal("Moto cadastrada com sucesso!");
-      setVaga("");
-      setModelo("");
-      setPlaca("");
-      setCor("");
-      setObservacoes("");
+      await AsyncStorage.setItem('motos', JSON.stringify(novasMotos));
+      exibirModal(t('slot.form.success'));
+      setVaga('');
+      setModelo('');
+      setPlaca('');
+      setCor('');
+      setObservacoes('');
     } catch (error) {
-      exibirModal("Erro ao cadastrar a moto. Tente novamente.");
+      exibirModal(t('slot.form.errorGeneric'));
     }
   };
 
@@ -83,38 +74,38 @@ export default function RegisterSlotScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Cadastrar Nova Vaga</Text>
+  <Text style={styles.title}>{t('slot.form.title')}</Text>
 
       <TextInput
-        placeholder="Digite a vaga (ex: B2)"
+        placeholder={t('slot.form.placeholderVaga')}
         value={vaga}
         onChangeText={setVaga}
         style={styles.input}
         placeholderTextColor="#aaa"
       />
       <TextInput
-        placeholder="Modelo da Moto"
+        placeholder={t('slot.form.placeholderModelo')}
         value={modelo}
         onChangeText={setModelo}
         style={styles.input}
         placeholderTextColor="#aaa"
       />
       <TextInput
-        placeholder="Placa"
+        placeholder={t('slot.form.placeholderPlaca')}
         value={placa}
         onChangeText={setPlaca}
         style={styles.input}
         placeholderTextColor="#aaa"
       />
       <TextInput
-        placeholder="Cor da Moto"
+        placeholder={t('slot.form.placeholderCor')}
         value={cor}
         onChangeText={setCor}
         style={styles.input}
         placeholderTextColor="#aaa"
       />
       <TextInput
-        placeholder="Observações (opcional)"
+        placeholder={t('slot.form.placeholderObservacoes')}
         value={observacoes}
         onChangeText={setObservacoes}
         style={styles.input}
@@ -123,7 +114,7 @@ export default function RegisterSlotScreen() {
       />
 
       <View style={styles.botao}>
-        <Button title="Salvar" color="#00c851" onPress={salvarVaga} />
+        <Button title={t('slot.form.action')} color="#00c851" onPress={salvarVaga} />
       </View>
 
       {/* Modal de Notificações */}
@@ -137,7 +128,7 @@ export default function RegisterSlotScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>{textoModal}</Text>
             <TouchableOpacity style={styles.modalButton} onPress={fecharModal}>
-              <Text style={styles.modalButtonText}>OK</Text>
+              <Text style={styles.modalButtonText}>{t('slot.modal.ok')}</Text>
             </TouchableOpacity>
           </View>
         </View>

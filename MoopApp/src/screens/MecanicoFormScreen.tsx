@@ -13,6 +13,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { Mecanico } from '../types';
 import MecanicoService from '../services/MecanicoService';
 import { ApiError } from '../services/ApiService';
+import { useTranslation } from 'react-i18next';
+import { createMecanicoSchema, validateWith } from '../validation/schemas';
 
 interface MecanicoFormScreenProps {
   navigation: any;
@@ -22,6 +24,7 @@ interface MecanicoFormScreenProps {
 const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, route }) => {
   const { theme } = useTheme();
   const { mecanico } = route.params || {};
+  const { t } = useTranslation();
   const isEditing = !!mecanico;
 
   const [nome, setNome] = useState(mecanico?.nome || '');
@@ -33,40 +36,20 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
 
   useEffect(() => {
     navigation.setOptions({
-      title: isEditing ? 'Editar Mecânico' : 'Novo Mecânico',
+      title: isEditing ? t('mecanico.form.titleEdit') : t('mecanico.form.titleNew'),
     });
-  }, [navigation, isEditing]);
-
-  const validateForm = (): boolean => {
-    let isValid = true;
-
-    // Reset errors
-    setNomeError('');
-    setEspecialidadeError('');
-
-    // Nome validation
-    if (!nome.trim()) {
-      setNomeError('Nome é obrigatório');
-      isValid = false;
-    } else if (nome.trim().length < 2) {
-      setNomeError('Nome deve ter pelo menos 2 caracteres');
-      isValid = false;
-    }
-
-    // Especialidade validation
-    if (!especialidade.trim()) {
-      setEspecialidadeError('Especialidade é obrigatória');
-      isValid = false;
-    } else if (especialidade.trim().length < 2) {
-      setEspecialidadeError('Especialidade deve ter pelo menos 2 caracteres');
-      isValid = false;
-    }
-
-    return isValid;
-  };
+  }, [navigation, isEditing, t]);
 
   const handleSave = async () => {
-    if (!validateForm()) return;
+    setNomeError('');
+    setEspecialidadeError('');
+    const schema = createMecanicoSchema(t);
+    const result = await validateWith(schema, { nome, especialidade });
+    if (!result.valid) {
+      setNomeError(result.errors.nome || '');
+      setEspecialidadeError(result.errors.especialidade || '');
+      return;
+    }
 
     try {
       setLoading(true);
@@ -78,20 +61,20 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
 
       if (isEditing) {
         await MecanicoService.update(mecanico.id, mecanicoData);
-        Alert.alert('Sucesso', 'Mecânico atualizado com sucesso', [
-          { text: 'OK', onPress: () => navigation.navigate('MecanicoList') }
+        Alert.alert(t('common.success'), t('mecanico.form.updated'), [
+          { text: t('common.ok'), onPress: () => navigation.navigate('MecanicoList') }
         ]);
       } else {
         await MecanicoService.create(mecanicoData);
-        Alert.alert('Sucesso', 'Mecânico criado com sucesso', [
-          { text: 'OK', onPress: () => navigation.navigate('MecanicoList') }
+        Alert.alert(t('common.success'), t('mecanico.form.created'), [
+          { text: t('common.ok'), onPress: () => navigation.navigate('MecanicoList') }
         ]);
       }
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro', error.message);
+        Alert.alert(t('common.error'), error.message);
       } else {
-        Alert.alert('Erro', 'Falha ao salvar mecânico');
+        Alert.alert(t('common.error'), t('mecanico.form.errorSave', 'Falha ao salvar mecânico'));
       }
     } finally {
       setLoading(false);
@@ -171,7 +154,7 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Nome</Text>
+          <Text style={styles.label}>{t('mecanico.form.nome')}</Text>
           <TextInput
             style={[styles.input, nomeError ? styles.inputError : null]}
             value={nome}
@@ -179,7 +162,7 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
               setNome(text);
               if (nomeError) setNomeError('');
             }}
-            placeholder="Digite o nome do mecânico"
+            placeholder={t('mecanico.form.placeholderNome')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
           />
@@ -187,7 +170,7 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Especialidade</Text>
+          <Text style={styles.label}>{t('mecanico.form.especialidade')}</Text>
           <TextInput
             style={[styles.input, especialidadeError ? styles.inputError : null]}
             value={especialidade}
@@ -195,7 +178,7 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
               setEspecialidade(text);
               if (especialidadeError) setEspecialidadeError('');
             }}
-            placeholder="Digite a especialidade do mecânico"
+            placeholder={t('mecanico.form.placeholderEspecialidade')}
             placeholderTextColor={theme.colors.textSecondary}
             autoCapitalize="words"
           />
@@ -207,7 +190,7 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
             style={[styles.button, styles.secondaryButton]}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.secondaryButtonText}>Cancelar</Text>
+            <Text style={styles.secondaryButtonText}>{t('common.cancel')}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -223,7 +206,7 @@ const MecanicoFormScreen: React.FC<MecanicoFormScreenProps> = ({ navigation, rou
               <ActivityIndicator color="white" />
             ) : (
               <Text style={styles.primaryButtonText}>
-                {isEditing ? 'Atualizar' : 'Salvar'}
+                {isEditing ? t('common.update') : t('common.save')}
               </Text>
             )}
           </TouchableOpacity>

@@ -12,6 +12,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import { Moto } from '../types';
 import MotoService from '../services/MotoService';
 import { ApiError } from '../services/ApiService';
@@ -22,6 +23,7 @@ interface MotoListScreenProps {
 
 const MotoListScreen: React.FC<MotoListScreenProps> = ({ navigation }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const [motos, setMotos] = useState<Moto[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -39,9 +41,9 @@ const MotoListScreen: React.FC<MotoListScreenProps> = ({ navigation }) => {
       setMotos(data);
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro', error.message);
+        Alert.alert(t('common.error'), error.message);
       } else {
-        Alert.alert('Erro', 'Falha ao carregar motos');
+        Alert.alert(t('common.error'), t('moto.form.loading', { defaultValue: 'Falha ao carregar motos' }));
       }
     } finally {
       setLoading(false);
@@ -56,12 +58,12 @@ const MotoListScreen: React.FC<MotoListScreenProps> = ({ navigation }) => {
 
   const handleDelete = (moto: Moto) => {
     Alert.alert(
-      'Confirmar Exclusão',
-      `Deseja excluir a moto ${moto.marca} ${moto.modelo}?`,
+      t('moto.delete.title'),
+      t('moto.delete.message', { marca: moto.marca, modelo: moto.modelo }),
       [
-        { text: 'Cancelar', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         { 
-          text: 'Excluir', 
+          text: t('common.delete'), 
           style: 'destructive',
           onPress: () => deleteMoto(moto.id)
         },
@@ -73,14 +75,14 @@ const MotoListScreen: React.FC<MotoListScreenProps> = ({ navigation }) => {
     try {
       await MotoService.delete(id);
       setMotos(prev => prev.filter(moto => moto.id !== id));
-      Alert.alert('Sucesso', 'Moto excluída com sucesso', [
-        { text: 'OK', onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) }
+      Alert.alert(t('common.success'), t('moto.delete.success'), [
+        { text: t('common.ok'), onPress: () => navigation.reset({ index: 0, routes: [{ name: 'Home' }] }) }
       ]);
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro', error.message);
+        Alert.alert(t('common.error'), error.message);
       } else {
-        Alert.alert('Erro', 'Falha ao excluir moto');
+        Alert.alert(t('common.error'), t('moto.delete.error', { defaultValue: 'Falha ao excluir moto' }));
       }
     }
   };
@@ -201,7 +203,7 @@ const MotoListScreen: React.FC<MotoListScreenProps> = ({ navigation }) => {
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={[styles.emptyText, { marginTop: theme.spacing.md }]}>
-          Carregando motos...
+          {t('moto.form.loading')}
         </Text>
       </View>
     );
@@ -213,7 +215,7 @@ const MotoListScreen: React.FC<MotoListScreenProps> = ({ navigation }) => {
         <View style={styles.emptyContainer}>
           <Ionicons name="car-sport" size={64} color={theme.colors.textSecondary} />
           <Text style={styles.emptyText}>
-            Nenhuma moto cadastrada.{'\n'}Toque no botão + para adicionar.
+            {t('moto.list.empty')}
           </Text>
         </View>
       ) : (

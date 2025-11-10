@@ -2,6 +2,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform, Alert } from 'react-native';
 
 export interface PushRegistrationResult {
   granted: boolean;
@@ -41,8 +42,9 @@ async function getExpoPushToken(): Promise<string | undefined> {
 }
 
 export async function registerForPushNotifications(): Promise<PushRegistrationResult> {
-  if (!Device.isDevice) {
-    return { granted: false, error: 'Notificações exigem dispositivo físico' };
+  // Em ambiente web ou simulador sem Device real, evitamos pedir permissão (gera warning) e usamos fallback.
+  if (!Device.isDevice || Platform.OS === 'web') {
+    return { granted: false, error: 'Web/simulador: push remoto indisponível, usando fallback local.' };
   }
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -87,28 +89,42 @@ export async function sendLocalNotification(title: string, body: string) {
 }
 
 export async function notifyCreation(entity: 'moto' | 'deposito', data: { nome?: string; marca?: string; modelo?: string }) {
-  // Usa linguagem persistida para mensagens localizadas rápidas sem carregar i18n aqui
-  const lang = (await AsyncStorage.getItem('i18n_lang')) || 'pt';
+  // Recupera idioma salvo corretamente (chave 'lang' usada no App.tsx)
+  const lang = (await AsyncStorage.getItem('lang')) || 'pt';
 
-  let titlePt = entity === 'moto' ? 'Nova Moto' : 'Novo Depósito';
-  let bodyPt = entity === 'moto'
-    ? `Moto ${data.marca ?? ''} ${data.modelo ?? ''} criada com sucesso.`.trim()
-    : `Depósito ${data.nome ?? ''} criado com sucesso.`.trim();
+  // Mensagens localizadas básicas (mantém chaves para futura integração com i18n se desejado)
+  const templates = {
+    pt: {
+      motoTitle: 'Nova Moto',
+      motoBody: `Moto ${data.marca ?? ''} ${data.modelo ?? ''} criada com sucesso.`.trim(),
+      depositoTitle: 'Novo Depósito',
+      depositoBody: `Depósito ${data.nome ?? ''} criado com sucesso.`.trim(),
+    },
+    es: {
+      motoTitle: 'Nueva Moto',
+      motoBody: `Moto ${data.marca ?? ''} ${data.modelo ?? ''} creada con éxito.`.trim(),
+      depositoTitle: 'Nuevo Depósito',
+      depositoBody: `Depósito ${data.nome ?? ''} creado con éxito.`.trim(),
+    },
+  };
+  const tpl = lang === 'es' ? templates.es : templates.pt;
+  const title = entity === 'moto' ? tpl.motoTitle : tpl.depositoTitle;
+  const body = entity === 'moto' ? tpl.motoBody : tpl.depositoBody;
 
-  let titleEs = entity === 'moto' ? 'Nueva Moto' : 'Nuevo Depósito';
-  let bodyEs = entity === 'moto'
-    ? `Moto ${data.marca ?? ''} ${data.modelo ?? ''} creada con éxito.`.trim()
-    : `Depósito ${data.nome ?? ''} creado con éxito.`.trim();
+  // Se ambiente web, usar alerta simples (push remoto indisponível)
+  if (Platform.OS === 'web') {
+    Alert.alert(title, body);
+    return;
+  }
 
-  const title = lang === 'es' ? titleEs : titlePt;
-  const body = lang === 'es' ? bodyEs : bodyPt;
-
-  // Envia push remota se houver token salvo
   const token = await AsyncStorage.getItem('expoPushToken');
   if (token) {
-    await sendTestPush(token, title, body);
+    try {
+      await sendTestPush(token, title, body);
+    } catch {
+      await sendLocalNotification(title, body);
+    }
   } else {
-    // fallback local
     await sendLocalNotification(title, body);
   }
 }

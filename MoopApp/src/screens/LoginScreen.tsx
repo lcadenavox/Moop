@@ -13,6 +13,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ApiError } from '../services/ApiService';
 import ApiStatus from '../components/ApiStatus';
+import { useTranslation } from 'react-i18next';
+import { createLoginSchema, validateWith } from '../validation/schemas';
 
 interface LoginScreenProps {
   navigation: any;
@@ -20,51 +22,34 @@ interface LoginScreenProps {
 
 const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  const validateForm = (): boolean => {
-    let isValid = true;
-
+  const handleLogin = async () => {
     // Reset errors
     setEmailError('');
     setPasswordError('');
 
-    // Email validation
-    if (!email.trim()) {
-      setEmailError('Email é obrigatório');
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      setEmailError('Email inválido');
-      isValid = false;
+    const schema = createLoginSchema(t);
+    const result = await validateWith(schema, { email, password });
+    if (!result.valid) {
+      setEmailError(result.errors.email || '');
+      setPasswordError(result.errors.password || '');
+      return;
     }
-
-    // Password validation
-    if (!password.trim()) {
-      setPasswordError('Senha é obrigatória');
-      isValid = false;
-    } else if (password.length < 6) {
-      setPasswordError('Senha deve ter pelo menos 6 caracteres');
-      isValid = false;
-    }
-
-    return isValid;
-  };
-
-  const handleLogin = async () => {
-    if (!validateForm()) return;
 
     try {
       await login(email, password);
       navigation.replace('Home');
     } catch (error) {
       if (error instanceof ApiError) {
-        Alert.alert('Erro de Login', error.message);
+        Alert.alert(t('auth.login.errorTitle'), error.message);
       } else {
-        Alert.alert('Erro', 'Ocorreu um erro inesperado. Tente novamente.');
+        Alert.alert(t('common.error'), t('auth.login.unexpected'));
       }
     }
   };
@@ -143,10 +128,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     <View style={styles.container}>
       <ApiStatus />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.title}>Entrar</Text>
+  <Text style={styles.title}>{t('auth.login.title')}</Text>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t('auth.login.email')}</Text>
           <TextInput
             style={[styles.input, emailError ? styles.inputError : null]}
             value={email}
@@ -154,7 +139,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               setEmail(text);
               if (emailError) setEmailError('');
             }}
-            placeholder="Digite seu email"
+            placeholder={t('auth.login.placeholderEmail')}
             placeholderTextColor={theme.colors.textSecondary}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -164,7 +149,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Senha</Text>
+          <Text style={styles.label}>{t('auth.login.password')}</Text>
           <TextInput
             style={[styles.input, passwordError ? styles.inputError : null]}
             value={password}
@@ -172,7 +157,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               setPassword(text);
               if (passwordError) setPasswordError('');
             }}
-            placeholder="Digite sua senha"
+            placeholder={t('auth.login.placeholderPassword')}
             placeholderTextColor={theme.colors.textSecondary}
             secureTextEntry
             autoCapitalize="none"
@@ -188,7 +173,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           {isLoading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text style={styles.buttonText}>Entrar</Text>
+            <Text style={styles.buttonText}>{t('auth.login.action')}</Text>
           )}
         </TouchableOpacity>
 
@@ -196,7 +181,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           style={styles.linkButton}
           onPress={() => navigation.navigate('Register')}
         >
-          <Text style={styles.linkText}>Não tem conta? Cadastre-se</Text>
+          <Text style={styles.linkText}>{t('auth.login.linkRegister')}</Text>
         </TouchableOpacity>
 
         {/* Test credentials removed as requested */}
